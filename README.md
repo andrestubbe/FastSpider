@@ -109,6 +109,15 @@ dependencies {
 }
 ```
 
+### Option 3: Direct Download (No Build Tool)
+Download the latest pre-compiled JARs directly to add them to your project's classpath:
+
+1. 📦 [**fastspider-v0.1.0.jar**](https://github.com/andrestubbe/FastSpider/releases/download/v0.1.0/fastspider-0.1.0.jar) (The Core Library & native JNI resources)
+2. ⚙️ [**fastcore-v0.1.0.jar**](https://github.com/andrestubbe/FastCore/releases/download/v0.1.0/fastcore-0.1.0.jar) (The Mandatory Native Loader)
+
+> [!IMPORTANT]
+> Both JARs must be present in your classpath for FastSpider's native functions to operate correctly.
+
 ---
 
 ## Technical Examples & Hero Demos
@@ -139,6 +148,7 @@ Combine FastSpider with other accelerators for maximum efficiency:
 * [**FastScrape**](https://github.com/andrestubbe/FastScrape) — Native SIMD HTML parser.
 * [**FastCore**](https://github.com/andrestubbe/FastCore) — Native loading substrate.
 * [**FastBytes**](https://github.com/andrestubbe/FastBytes) — Hardware-aligned byte arrays.
+* [**FastJSON**](https://github.com/andrestubbe/FastJSON) — SIMD-powered JSON parser.
 
 ---
 
