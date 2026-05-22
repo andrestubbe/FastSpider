@@ -1,0 +1,7 @@
+﻿LIBRARY fastspider
+EXPORTS
+    ; JNI Method Exports
+    ; Format: Java_packagename_Classname_methodName
+    
+    Java_fastspider_FastSpider_doSomethingNative
+
