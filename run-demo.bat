@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 > nul
 echo ⚡ Building Main Project (Quiet Mode)...
 call mvn clean package -DskipTests -q
 if %ERRORLEVEL% NEQ 0 ( 
