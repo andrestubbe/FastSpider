@@ -1,5 +1,5 @@
-﻿#ifndef FASTXXX_H
-#define FASTXXX_H
+#ifndef FASTSPIDER_H
+#define FASTSPIDER_H
 
 #include <jni.h>
 
@@ -7,12 +7,19 @@
 extern "C" {
 #endif
 
-// Export declarations (Matches fastspider.def)
-JNIEXPORT void JNICALL Java_fastspider_FastSpider_doSomethingNative(JNIEnv* env, jobject obj);
+// Export JNI declarations for FastSpiderImpl
+
+JNIEXPORT jobject JNICALL Java_fastspider_FastSpiderImpl_nativeFetch(
+    JNIEnv* env, jobject obj, jstring urlStr);
+
+JNIEXPORT jstring JNICALL Java_fastspider_FastSpiderImpl_nativeExtractCleanText(
+    JNIEnv* env, jobject obj, jbyteArray htmlData);
+
+JNIEXPORT jobjectArray JNICALL Java_fastspider_FastSpiderImpl_nativeExtractHrefs(
+    JNIEnv* env, jobject obj, jbyteArray htmlData);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // FASTXXX_H
-
+#endif // FASTSPIDER_H

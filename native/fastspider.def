@@ -1,7 +1,8 @@
-﻿LIBRARY fastspider
+LIBRARY fastspider
 EXPORTS
     ; JNI Method Exports
     ; Format: Java_packagename_Classname_methodName
     
-    Java_fastspider_FastSpider_doSomethingNative
-
+    Java_fastspider_FastSpiderImpl_nativeFetch
+    Java_fastspider_FastSpiderImpl_nativeExtractCleanText
+    Java_fastspider_FastSpiderImpl_nativeExtractHrefs

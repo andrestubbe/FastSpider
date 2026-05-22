@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>io.github.andrestubbe</groupId>
             <artifactId>fastcore</artifactId>
-            <version>1.0.0</version>
+            <version>v0.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -69,6 +69,7 @@
             <!-- Include native DLL in JAR (loaded from build folder) -->
             <resource>
                 <directory>build</directory>
+                <targetPath>native</targetPath>
                 <includes>
                     <include>*.dll</include>
                 </includes>
