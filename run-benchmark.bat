@@ -1,7 +1,7 @@
 @echo off
 chcp 65001 > nul
-echo Building main project...
-call mvn clean package -DskipTests
+echo [BUILD] Building Main Project (Quiet Mode)...
+call mvn clean package -DskipTests -q
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo [ERROR] Maven build failed.
@@ -10,9 +10,8 @@ if %ERRORLEVEL% NEQ 0 (
 )
 
 echo.
-echo Running Benchmark...
-cd examples\Benchmark
-call mvn compile exec:java
-cd ..\..
+echo [RUN] Running Benchmark...
+call mvn exec:java "-Dexec.mainClass=fastspider.Benchmark" -q
 pause
+
 

@@ -14,18 +14,29 @@
 #endif
 
 // ============================================================================
-// DLL Entry Point
+// DLL Entry Point & Global Session
 // ============================================================================
+static HINTERNET g_hSession = nullptr;
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved) {
     switch (ul_reason_for_call) {
         case DLL_PROCESS_ATTACH:
             DisableThreadLibraryCalls(hModule);
+            g_hSession = WinHttpOpen(L"FastSpider/1.0 (Windows; JNI)",
+                                     WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+                                     WINHTTP_NO_PROXY_NAME,
+                                     WINHTTP_NO_PROXY_BYPASS, 0);
             break;
         case DLL_PROCESS_DETACH:
+            if (g_hSession) {
+                WinHttpCloseHandle(g_hSession);
+                g_hSession = nullptr;
+            }
             break;
     }
     return TRUE;
 }
+
 
 // ============================================================================
 // CPU Feature Detection
@@ -424,17 +435,11 @@ JNIEXPORT jobject JNICALL Java_fastspider_FastSpiderImpl_nativeFetch(
         // Measure performance duration
         auto startTime = std::chrono::high_resolution_clock::now();
 
-        HINTERNET hSession = nullptr;
         HINTERNET hConnect = nullptr;
         HINTERNET hRequest = nullptr;
 
-        hSession = WinHttpOpen(L"FastSpider/1.0 (Windows; JNI)",
-                               WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
-                               WINHTTP_NO_PROXY_NAME,
-                               WINHTTP_NO_PROXY_BYPASS, 0);
-
-        if (hSession) {
-            hConnect = WinHttpConnect(hSession, host.c_str(), urlComp.nPort, 0);
+        if (g_hSession) {
+            hConnect = WinHttpConnect(g_hSession, host.c_str(), urlComp.nPort, 0);
         }
 
         if (hConnect) {
@@ -503,7 +508,6 @@ JNIEXPORT jobject JNICALL Java_fastspider_FastSpiderImpl_nativeFetch(
         // Close Handles
         if (hRequest) WinHttpCloseHandle(hRequest);
         if (hConnect) WinHttpCloseHandle(hConnect);
-        if (hSession) WinHttpCloseHandle(hSession);
 
         auto endTime = std::chrono::high_resolution_clock::now();
         fetchTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
