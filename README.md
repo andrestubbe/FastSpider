@@ -113,7 +113,7 @@ dependencies {
 Download the latest pre-compiled JARs directly to add them to your project's classpath:
 
 1. 📦 [**fastspider-v0.1.0.jar**](https://github.com/andrestubbe/FastSpider/releases/download/v0.1.0/fastspider-0.1.0.jar) (The Core Library & native JNI resources)
-2. ⚙️ [**fastcore-v0.1.0.jar**](https://github.com/andrestubbe/FastCore/releases/download/v0.1.0/fastcore-0.1.0.jar) (The Mandatory Native Loader)
+2. ⚙️ [**fastcore-v0.1.0.jar**](https://github.com/andrestubbe/FastCore/releases/download/v0.1.0/fastcore-v0.1.0.jar) (The Mandatory Native Loader)
 
 > [!IMPORTANT]
 > Both JARs must be present in your classpath for FastSpider's native functions to operate correctly.
