@@ -35,7 +35,7 @@
         <!-- Run 'mvn clean package' in the parent directory first.   -->
         <!-- ======================================================== -->
         <dependency>
-            <groupId>io.github.andrestubbe</groupId>
+            <groupId>com.github.andrestubbe</groupId>
             <artifactId>fastspider</artifactId>
             <version>0.1.0</version>
             <scope>system</scope>

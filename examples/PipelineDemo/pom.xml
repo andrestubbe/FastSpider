@@ -32,7 +32,7 @@
         
         <!-- Local FastSpider Jar -->
         <dependency>
-            <groupId>io.github.andrestubbe</groupId>
+            <groupId>com.github.andrestubbe</groupId>
             <artifactId>fastspider</artifactId>
             <version>0.1.0</version>
             <scope>system</scope>
@@ -41,7 +41,7 @@
         
         <!-- Local FastScrape Jar -->
         <dependency>
-            <groupId>io.github.andrestubbe</groupId>
+            <groupId>com.github.andrestubbe</groupId>
             <artifactId>fastscrape</artifactId>
             <version>0.1.0</version>
             <scope>system</scope>

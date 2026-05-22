@@ -1,10 +1,11 @@
-﻿@echo off
-echo âš¡ Building Main Project...
-call mvn clean package -DskipTests
-if %ERRORLEVEL% NEQ 0 ( pause & exit /b )
-echo ðŸš€ Running Hero Demo...
-cd examples
-call mvn compile exec:java -Dexec.mainClass=fastspider.Demo
-cd ..
+@echo off
+echo ⚡ Building Main Project (Quiet Mode)...
+call mvn clean package -DskipTests -q
+if %ERRORLEVEL% NEQ 0 ( 
+    echo ❌ Build failed!
+    pause 
+    exit /b 
+)
+echo 🚀 Running Hero Demo...
+call mvn exec:java -Dexec.mainClass=fastspider.Demo -q
 pause
-
