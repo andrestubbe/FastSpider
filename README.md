@@ -113,7 +113,7 @@ dependencies {
 Download the latest pre-compiled JARs directly to add them to your project's classpath:
 
 1. 📦 [**fastspider-v0.1.0.jar**](https://github.com/andrestubbe/FastSpider/releases/download/v0.1.0/fastspider-0.1.0.jar) (The Core Library & native JNI resources)
-2. ⚙️ [**fastcore-v0.1.0.jar**](https://github.com/andrestubbe/FastCore/releases/tag/v0.1.0) (The Mandatory Native Loader)
+2. ⚙️ [**fastcore-v0.1.0.jar**](https://github.com/andrestubbe/FastCore/releases/download/v0.1.0/fastcore-0.1.0.jar) (The Mandatory Native Loader)
 
 > [!IMPORTANT]
 > Both JARs must be present in your classpath for FastSpider's native functions to operate correctly.
@@ -124,12 +124,19 @@ Download the latest pre-compiled JARs directly to add them to your project's cla
 Explore the complete source configurations and benchmarks:
 
 * **⚡ Interactive Demo**: [Demo.java](src/main/java/fastspider/Demo.java) (sets up an offline mock server, performs parallel fetches of delayed endpoints, and extracts content).
+* **⚡ Joint Pipeline Demo**: [PipelineDemo.java](examples/PipelineDemo/src/main/java/fastpipeline/PipelineDemo.java) (orchestrates FastSpider and FastScrape in unison: fetches asynchronously via WinHTTP and parses HTML via AVX2 in a zero-copy pipeline).
 * **📈 Performance Benchmark**: [Benchmark.java](src/main/java/fastspider/Benchmark.java) (races concurrent fetches against standard Java HttpClient).
 * **🧪 Test Suite**: [FastSpiderTest.java](src/test/java/fastspider/FastSpiderTest.java) (fully automated JUnit 5 crawler test suite).
 
 Run the hero demo locally from the command line:
 ```bash
 mvn exec:java "-Dexec.mainClass=fastspider.Demo"
+```
+
+Run the combined crawler & parser pipeline demo:
+```bash
+cd examples/PipelineDemo
+run-pipeline.bat
 ```
 
 ---

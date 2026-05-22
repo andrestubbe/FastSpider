@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     
     <groupId>io.github.andrestubbe</groupId>
-    <artifactId>fastspider-benchmark</artifactId>
+    <artifactId>fastpipeline-demo</artifactId>
     <version>1.0.0</version>
     <packaging>jar</packaging>
     
@@ -23,19 +23,29 @@
     </repositories>
     
     <dependencies>
+        <!-- Unified Loader Core -->
         <dependency>
             <groupId>io.github.andrestubbe</groupId>
             <artifactId>fastcore</artifactId>
             <version>1.0.0</version>
         </dependency>
         
-        <!-- Local System Path for Development -->
+        <!-- Local FastSpider Jar -->
         <dependency>
             <groupId>io.github.andrestubbe</groupId>
             <artifactId>fastspider</artifactId>
             <version>0.1.0</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/../../target/fastspider-0.1.0.jar</systemPath>
+        </dependency>
+        
+        <!-- Local FastScrape Jar -->
+        <dependency>
+            <groupId>io.github.andrestubbe</groupId>
+            <artifactId>fastscrape</artifactId>
+            <version>0.1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../../../FastScrape/target/fastscrape-0.1.0.jar</systemPath>
         </dependency>
     </dependencies>
     
@@ -56,11 +66,10 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <version>3.1.0</version>
                 <configuration>
-                    <mainClass>fastspider.Benchmark</mainClass>
+                    <mainClass>fastpipeline.PipelineDemo</mainClass>
                     <commandlineArgs>--enable-native-access=ALL-UNNAMED</commandlineArgs>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 </project>
-
