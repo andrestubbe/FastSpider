@@ -7,6 +7,7 @@
 #include <chrono>
 #include <algorithm>
 #include <immintrin.h>
+#include <cctype>
 
 #ifdef _MSC_VER
 #include <intrin.h>
@@ -58,6 +59,15 @@ bool hasAVX2() {
 }
 
 // ============================================================================
+// Helpers and Utilities
+// ============================================================================
+
+// Fast ASCII case insensitivity that is safe from UB on non-ASCII characters
+inline uint8_t toLowerByte(uint8_t c) {
+    return (c >= 'A' && c <= 'Z') ? (c + ('a' - 'A')) : c;
+}
+
+// ============================================================================
 // SIMD AVX2 and Fallback Parser Implementations
 // ============================================================================
 
@@ -71,10 +81,12 @@ std::string extractCleanTextCpp(const uint8_t* data, size_t length) {
     bool in_style = false;
     bool in_comment = false;
     
+    const bool useAvx2 = hasAVX2();
+    
     while (i < length) {
         if (!in_tag && !in_script && !in_style && !in_comment) {
-            // AVX2 accelerated search for '<' or whitespace if we have AVX2 support
-            if (hasAVX2() && i + 31 < length) {
+            // AVX2 accelerated search for '<' or whitespace
+            if (useAvx2 && i + 31 < length) {
                 __m256i chunk = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(data + i));
                 __m256i tagChar = _mm256_set1_epi8('<');
                 __m256i spaceChar = _mm256_set1_epi8(' ');
@@ -95,6 +107,18 @@ std::string extractCleanTextCpp(const uint8_t* data, size_t length) {
                     result.append(reinterpret_cast<const char*>(data + i), 32);
                     i += 32;
                     continue;
+                } else {
+                    unsigned long index = 32;
+#ifdef _MSC_VER
+                    _BitScanForward(&index, mask);
+#else
+                    index = __builtin_ctz(mask);
+#endif
+                    if (index > 0) {
+                        result.append(reinterpret_cast<const char*>(data + i), index);
+                        i += index;
+                        continue;
+                    }
                 }
             }
         }
@@ -111,37 +135,57 @@ std::string extractCleanTextCpp(const uint8_t* data, size_t length) {
         }
         
         if (in_script) {
-            if (c == '<' && i + 8 < length &&
+            // Tolerant script closing tag match: </script  > or </script type="...">
+            if (c == '<' && i + 7 < length &&
                 data[i + 1] == '/' &&
-                tolower(data[i + 2]) == 's' &&
-                tolower(data[i + 3]) == 'c' &&
-                tolower(data[i + 4]) == 'r' &&
-                tolower(data[i + 5]) == 'i' &&
-                tolower(data[i + 6]) == 'p' &&
-                tolower(data[i + 7]) == 't' &&
-                data[i + 8] == '>') {
-                in_script = false;
-                i += 9;
-            } else {
-                i++;
+                toLowerByte(data[i + 2]) == 's' &&
+                toLowerByte(data[i + 3]) == 'c' &&
+                toLowerByte(data[i + 4]) == 'r' &&
+                toLowerByte(data[i + 5]) == 'i' &&
+                toLowerByte(data[i + 6]) == 'p' &&
+                toLowerByte(data[i + 7]) == 't') {
+                
+                char next = (i + 8 < length) ? data[i + 8] : '>';
+                if (next == '>' || next == ' ' || next == '\t' || next == '\r' || next == '\n' || next == '/') {
+                    size_t closeIdx = i + 8;
+                    while (closeIdx < length && data[closeIdx] != '>') {
+                        closeIdx++;
+                    }
+                    if (closeIdx < length) {
+                        in_script = false;
+                        i = closeIdx + 1;
+                        continue;
+                    }
+                }
             }
+            i++;
             continue;
         }
         
         if (in_style) {
-            if (c == '<' && i + 7 < length &&
+            // Tolerant style closing tag match: </style  >
+            if (c == '<' && i + 6 < length &&
                 data[i + 1] == '/' &&
-                tolower(data[i + 2]) == 's' &&
-                tolower(data[i + 3]) == 't' &&
-                tolower(data[i + 4]) == 'y' &&
-                tolower(data[i + 5]) == 'l' &&
-                tolower(data[i + 6]) == 'e' &&
-                data[i + 7] == '>') {
-                in_style = false;
-                i += 8;
-            } else {
-                i++;
+                toLowerByte(data[i + 2]) == 's' &&
+                toLowerByte(data[i + 3]) == 't' &&
+                toLowerByte(data[i + 4]) == 'y' &&
+                toLowerByte(data[i + 5]) == 'l' &&
+                toLowerByte(data[i + 6]) == 'e') {
+                
+                char next = (i + 7 < length) ? data[i + 7] : '>';
+                if (next == '>' || next == ' ' || next == '\t' || next == '\r' || next == '\n' || next == '/') {
+                    size_t closeIdx = i + 7;
+                    while (closeIdx < length && data[closeIdx] != '>') {
+                        closeIdx++;
+                    }
+                    if (closeIdx < length) {
+                        in_style = false;
+                        i = closeIdx + 1;
+                        continue;
+                    }
+                }
             }
+            i++;
             continue;
         }
         
@@ -154,12 +198,12 @@ std::string extractCleanTextCpp(const uint8_t* data, size_t length) {
                 continue;
             }
             if (i + 7 < length &&
-                tolower(data[i + 1]) == 's' &&
-                tolower(data[i + 2]) == 'c' &&
-                tolower(data[i + 3]) == 'r' &&
-                tolower(data[i + 4]) == 'i' &&
-                tolower(data[i + 5]) == 'p' &&
-                tolower(data[i + 6]) == 't' &&
+                toLowerByte(data[i + 1]) == 's' &&
+                toLowerByte(data[i + 2]) == 'c' &&
+                toLowerByte(data[i + 3]) == 'r' &&
+                toLowerByte(data[i + 4]) == 'i' &&
+                toLowerByte(data[i + 5]) == 'p' &&
+                toLowerByte(data[i + 6]) == 't' &&
                 (data[i + 7] == '>' || data[i + 7] == ' ' || data[i + 7] == '\t' || data[i + 7] == '\r' || data[i + 7] == '\n')) {
                 in_script = true;
                 in_tag = false;
@@ -167,11 +211,11 @@ std::string extractCleanTextCpp(const uint8_t* data, size_t length) {
                 continue;
             }
             if (i + 6 < length &&
-                tolower(data[i + 1]) == 's' &&
-                tolower(data[i + 2]) == 't' &&
-                tolower(data[i + 3]) == 'y' &&
-                tolower(data[i + 4]) == 'l' &&
-                tolower(data[i + 5]) == 'e' &&
+                toLowerByte(data[i + 1]) == 's' &&
+                toLowerByte(data[i + 2]) == 't' &&
+                toLowerByte(data[i + 3]) == 'y' &&
+                toLowerByte(data[i + 4]) == 'l' &&
+                toLowerByte(data[i + 5]) == 'e' &&
                 (data[i + 6] == '>' || data[i + 6] == ' ' || data[i + 6] == '\t' || data[i + 6] == '\r' || data[i + 6] == '\n')) {
                 in_style = true;
                 in_tag = false;
@@ -179,23 +223,41 @@ std::string extractCleanTextCpp(const uint8_t* data, size_t length) {
                 continue;
             }
             
-            bool is_block_close = false;
+            // Check for HTML5 Block Boundaries and self-closing tags
+            bool is_block = false;
             if (i + 2 < length && data[i + 1] == '/') {
-                char next1 = tolower(data[i + 2]);
-                if (next1 == 'p' && i + 3 < length && data[i + 3] == '>') {
-                    is_block_close = true;
-                } else if (next1 == 'd' && i + 5 < length && tolower(data[i + 3]) == 'i' && tolower(data[i + 4]) == 'v' && data[i + 5] == '>') {
-                    is_block_close = true;
-                } else if (next1 == 'l' && i + 4 < length && tolower(data[i + 3]) == 'i' && data[i + 4] == '>') {
-                    is_block_close = true;
-                } else if (next1 == 'b' && i + 4 < length && tolower(data[i + 3]) == 'r' && data[i + 4] == '>') {
-                    is_block_close = true;
-                } else if (next1 == 'h' && i + 4 < length && data[i + 3] >= '1' && data[i + 3] <= '6' && data[i + 4] == '>') {
-                    is_block_close = true;
+                size_t nameStart = i + 2;
+                size_t nameLen = 0;
+                while (nameStart + nameLen < length && data[nameStart + nameLen] != '>' && data[nameStart + nameLen] != ' ' && data[nameStart + nameLen] != '\t' && data[nameStart + nameLen] != '\r' && data[nameStart + nameLen] != '\n') {
+                    nameLen++;
+                }
+                if (nameLen > 0) {
+                    std::string tagNameStr(reinterpret_cast<const char*>(data + nameStart), nameLen);
+                    for (char &ch : tagNameStr) ch = toLowerByte(ch);
+                    if (tagNameStr == "p" || tagNameStr == "div" || tagNameStr == "li" || tagNameStr == "br" ||
+                        (tagNameStr[0] == 'h' && tagNameStr.length() == 2 && tagNameStr[1] >= '1' && tagNameStr[1] <= '6') ||
+                        tagNameStr == "section" || tagNameStr == "article" || tagNameStr == "header" || tagNameStr == "footer" ||
+                        tagNameStr == "aside" || tagNameStr == "nav" || tagNameStr == "main" || tagNameStr == "tr" ||
+                        tagNameStr == "td" || tagNameStr == "ul" || tagNameStr == "ol" || tagNameStr == "blockquote") {
+                        is_block = true;
+                    }
+                }
+            } else if (i + 2 < length) {
+                size_t nameStart = i + 1;
+                size_t nameLen = 0;
+                while (nameStart + nameLen < length && data[nameStart + nameLen] != '>' && data[nameStart + nameLen] != '/' && data[nameStart + nameLen] != ' ' && data[nameStart + nameLen] != '\t' && data[nameStart + nameLen] != '\r' && data[nameStart + nameLen] != '\n') {
+                    nameLen++;
+                }
+                if (nameLen > 0) {
+                    std::string tagNameStr(reinterpret_cast<const char*>(data + nameStart), nameLen);
+                    for (char &ch : tagNameStr) ch = toLowerByte(ch);
+                    if (tagNameStr == "br" || tagNameStr == "hr") {
+                        is_block = true;
+                    }
                 }
             }
             
-            if (is_block_close) {
+            if (is_block) {
                 if (!result.empty() && result.back() != '\n') {
                     while (!result.empty() && result.back() == ' ') {
                         result.pop_back();
@@ -236,21 +298,34 @@ std::string extractCleanTextCpp(const uint8_t* data, size_t length) {
 std::vector<std::string> extractHrefsCpp(const uint8_t* data, size_t length) {
     std::vector<std::string> links;
     size_t i = 0;
+    const bool useAvx2 = hasAVX2();
     
     while (i < length) {
-        if (hasAVX2() && i + 31 < length) {
+        if (useAvx2 && i + 31 < length) {
             __m256i chunk = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(data + i));
             __m256i target = _mm256_set1_epi8('<');
             int mask = _mm256_movemask_epi8(_mm256_cmpeq_epi8(chunk, target));
             if (mask == 0) {
                 i += 32;
                 continue;
+            } else {
+                unsigned long index = 32;
+#ifdef _MSC_VER
+                _BitScanForward(&index, mask);
+#else
+                index = __builtin_ctz(mask);
+#endif
+                if (index > 0) {
+                    i += index;
+                    continue;
+                }
             }
         }
         
         if (data[i] == '<') {
-            if (i + 2 < length && (data[i + 1] == 'a' || data[i + 1] == 'A') && 
-                (data[i + 2] == ' ' || data[i + 2] == '\t' || data[i + 2] == '\r' || data[i + 2] == '\n')) {
+            // Support <a> tags with no space, or with standard newlines, tabs, and self-closing slashes
+            if (i + 2 < length && (toLowerByte(data[i + 1]) == 'a') && 
+                (data[i + 2] == '>' || data[i + 2] == '/' || data[i + 2] == ' ' || data[i + 2] == '\t' || data[i + 2] == '\r' || data[i + 2] == '\n')) {
                 size_t tag_start = i;
                 size_t tag_end = tag_start;
                 for (size_t j = tag_start; j < length; j++) {
@@ -262,11 +337,13 @@ std::vector<std::string> extractHrefsCpp(const uint8_t* data, size_t length) {
                 
                 if (tag_end > tag_start) {
                     for (size_t k = tag_start + 2; k + 5 < tag_end; k++) {
-                        if (tolower(data[k]) == 'h' &&
-                            tolower(data[k + 1]) == 'r' &&
-                            tolower(data[k + 2]) == 'e' &&
-                            tolower(data[k + 3]) == 'f' &&
-                            data[k + 4] == '=') {
+                        // Ensure href attribute name is preceded by standard boundaries, preventing class-name matching
+                        if (toLowerByte(data[k]) == 'h' &&
+                            toLowerByte(data[k + 1]) == 'r' &&
+                            toLowerByte(data[k + 2]) == 'e' &&
+                            toLowerByte(data[k + 3]) == 'f' &&
+                            data[k + 4] == '=' &&
+                            (data[k - 1] == ' ' || data[k - 1] == '\t' || data[k - 1] == '\r' || data[k - 1] == '\n' || data[k - 1] == 'a' || data[k - 1] == 'A')) {
                             
                             size_t val_start = k + 5;
                             while (val_start < tag_end && (data[val_start] == ' ' || data[val_start] == '\t')) {
@@ -315,6 +392,8 @@ extern "C" {
 
 JNIEXPORT jobject JNICALL Java_fastspider_FastSpiderImpl_nativeFetch(
     JNIEnv* env, jobject obj, jstring urlStr) {
+
+    if (urlStr == nullptr) return nullptr;
 
     // 1. Convert URL to wide string for WinHTTP
     const jchar* jUrl = env->GetStringChars(urlStr, nullptr);
@@ -414,7 +493,7 @@ JNIEXPORT jobject JNICALL Java_fastspider_FastSpiderImpl_nativeFetch(
                     }
                 } while (dwSizeAvailable > 0);
             } else {
-                // If connection failed (e.g. DNS or Timeout), status is 0 or 503
+                // If connection failed (e.g. DNS or Timeout), status is 503
                 dwStatusCode = 503; 
             }
         } else {
@@ -455,7 +534,10 @@ JNIEXPORT jobject JNICALL Java_fastspider_FastSpiderImpl_nativeFetch(
 JNIEXPORT jstring JNICALL Java_fastspider_FastSpiderImpl_nativeExtractCleanText(
     JNIEnv* env, jobject obj, jbyteArray htmlData) {
 
+    if (htmlData == nullptr) return env->NewStringUTF("");
     jsize len = env->GetArrayLength(htmlData);
+    if (len == 0) return env->NewStringUTF("");
+
     void* bytes = env->GetPrimitiveArrayCritical(htmlData, nullptr);
     if (!bytes) return env->NewStringUTF("");
 
@@ -468,17 +550,19 @@ JNIEXPORT jstring JNICALL Java_fastspider_FastSpiderImpl_nativeExtractCleanText(
 JNIEXPORT jobjectArray JNICALL Java_fastspider_FastSpiderImpl_nativeExtractHrefs(
     JNIEnv* env, jobject obj, jbyteArray htmlData) {
 
+    jclass stringClazz = env->FindClass("java/lang/String");
+    if (htmlData == nullptr) return env->NewObjectArray(0, stringClazz, nullptr);
     jsize len = env->GetArrayLength(htmlData);
+    if (len == 0) return env->NewObjectArray(0, stringClazz, nullptr);
+
     void* bytes = env->GetPrimitiveArrayCritical(htmlData, nullptr);
     if (!bytes) {
-        jclass stringClazz = env->FindClass("java/lang/String");
         return env->NewObjectArray(0, stringClazz, nullptr);
     }
 
     std::vector<std::string> links = extractHrefsCpp(reinterpret_cast<const uint8_t*>(bytes), len);
     env->ReleasePrimitiveArrayCritical(htmlData, bytes, JNI_ABORT);
 
-    jclass stringClazz = env->FindClass("java/lang/String");
     jobjectArray array = env->NewObjectArray(static_cast<jsize>(links.size()), stringClazz, nullptr);
     for (size_t i = 0; i < links.size(); i++) {
         jstring val = env->NewStringUTF(links[i].c_str());
