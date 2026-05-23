@@ -72,10 +72,10 @@ Measured on **Intel/AMD x64 Hardware** with Windows 11.
 
 ## Installation
 
-FastJava modules require **two** dependencies: the module itself, and `FastCore` (which automatically unpacks and loads the JNI library).
+### Option 1: Maven (Recommended)
+Add the JitPack repository and the dependencies to your `pom.xml`:
 
-### Maven (JitPack)
-```xml
+`xml
 <repositories>
     <repository>
         <id>jitpack.io</id>
@@ -84,41 +84,42 @@ FastJava modules require **two** dependencies: the module itself, and `FastCore`
 </repositories>
 
 <dependencies>
+    <!-- FastSpider Library -->
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>fastspider</artifactId>
         <version>v0.1.0</version>
     </dependency>
+    <!-- FastCore (Required Native Loader) -->
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>fastcore</artifactId>
         <version>v0.1.0</version>
     </dependency>
 </dependencies>
-```
+`
 
-### Gradle (JitPack)
-```gradle
+### Option 2: Gradle (via JitPack)
+`groovy
 repositories {
     maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:fastspider:v0.1.0'
+    implementation 'com.github.andrestubbe:.1.0'
     implementation 'com.github.andrestubbe:fastcore:v0.1.0'
 }
-```
+`
 
 ### Option 3: Direct Download (No Build Tool)
-Download the latest pre-compiled JARs directly to add them to your project's classpath:
+Download the latest JARs directly to add them to your classpath:
 
-1. 📦 [**fastspider-v0.1.0.jar**](https://github.com/andrestubbe/FastSpider/releases/download/v0.1.0/fastspider-0.1.0.jar) (The Core Library & native JNI resources)
-2. ⚙️ [**fastcore-v0.1.0.jar**](https://github.com/andrestubbe/FastCore/releases/download/v0.1.0/fastcore-v0.1.0.jar) (The Mandatory Native Loader)
+1. 📦 **[fastspider-v0.1.0.jar](https://github.com/andrestubbe/FastSpider/releases/download/v0.1.0/fastspider-v0.1.0.jar)** (The Core Library)
+2. ⚙️ **[fastcore-v0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/v0.1.0/fastcore-v0.1.0.jar)** (The Mandatory Native Loader)
 
 > [!IMPORTANT]
-> Both JARs must be present in your classpath for FastSpider's native functions to operate correctly.
+> All JARs must be in your classpath for the native JNI calls to function correctly.
 
----
 
 ## Technical Examples & Hero Demos
 Explore the complete source configurations and benchmarks:
