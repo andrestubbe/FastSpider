@@ -67,10 +67,10 @@ Measured on **Intel/AMD x64 Hardware** with Windows 11.
 
 | Method | Description | Target Path |
 |--------|-------------|-------------|
-| `fetchAsync(...)` | Schedules a non-blocking asynchronous fetch inside the Virtual Thread Executor. | [Reference →](REFERENCE.md#fetchasync) |
-| `fetchBatch(...)` | Performs parallel concurrent page crawls and blocks until all complete. | [Reference →](REFERENCE.md#fetchbatch) |
-| `extractCleanText(...)` | Cleans document tags natively to yield readable text for LLMs. | [Reference →](REFERENCE.md#extractcleantext) |
-| `extractHrefs(...)` | Rapidly extracts all hyperlink targets from HTML page bytes natively. | [Reference →](REFERENCE.md#extracthrefs) |
+| `fetchAsync(...)` | Schedules a non-blocking asynchronous fetch inside the Virtual Thread Executor. | [Reference →](docs/REFERENCE.md#fetchasync) |
+| `fetchBatch(...)` | Performs parallel concurrent page crawls and blocks until all complete. | [Reference →](docs/REFERENCE.md#fetchbatch) |
+| `extractCleanText(...)` | Cleans document tags natively to yield readable text for LLMs. | [Reference →](docs/REFERENCE.md#extractcleantext) |
+| `extractHrefs(...)` | Rapidly extracts all hyperlink targets from HTML page bytes natively. | [Reference →](docs/REFERENCE.md#extracthrefs) |
 
 > [!TIP]
 > Use `FastSpider.open()` to obtain a thread-safe, reusable native crawler instance.
