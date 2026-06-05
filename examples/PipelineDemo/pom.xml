@@ -6,7 +6,7 @@
     
     <groupId>com.github.andrestubbe</groupId>
             <artifactId>fastpipeline-demo</artifactId>
-            <version>0.1.0</version>
+            <version>v0.1.0</version>
     <packaging>jar</packaging>
     
     <properties>
@@ -26,15 +26,15 @@
         <!-- Unified Loader Core -->
         <dependency>
             <groupId>com.github.andrestubbe</groupId>
-            <artifactId>fastcore</artifactId>
-            <version>0.1.0</version>
+            <artifactId>FastCore</artifactId>
+            <version>v0.1.0</version>
         </dependency>
         
         <!-- Local FastSpider Jar -->
         <dependency>
             <groupId>com.github.andrestubbe</groupId>
-            <artifactId>fastspider</artifactId>
-            <version>0.1.0</version>
+            <artifactId>FastSpider</artifactId>
+            <version>v0.1.0</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/../../target/fastspider-0.1.0.jar</systemPath>
         </dependency>
@@ -42,8 +42,8 @@
         <!-- Local FastScrape Jar -->
         <dependency>
             <groupId>com.github.andrestubbe</groupId>
-            <artifactId>fastscrape</artifactId>
-            <version>0.1.0</version>
+            <artifactId>FastScrape</artifactId>
+            <version>v0.1.0</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/../../../FastScrape/target/fastscrape-0.1.0.jar</systemPath>
         </dependency>

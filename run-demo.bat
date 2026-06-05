@@ -1,9 +1,8 @@
-﻿@echo off
-chcp 65001 > nul
+@echo off
     echo [ERROR] Build failed!
     pause 
     exit /b 
 )
-echo [RUN] Running Hero Demo...
-call mvn exec:java -Dexec.mainClass=fastspider.Demo -q
+echo [FastSpider] Running Demo (via JitPack)...
+call mvn exec:java -Dexec.mainClass=fastspider.Demo
 pause
