@@ -1,12 +1,10 @@
-@echo off
+﻿@echo off
 chcp 65001 > nul
 echo ====================================================================
 echo [PIPELINE] FastJava Pipeline Orchestrator - Building Dependencies
 echo ====================================================================
 
 echo [1/3] Packaging FastSpider native library (Quiet)...
-call mvn clean package -DskipTests -q
-if %ERRORLEVEL% NEQ 0 ( 
     echo [ERROR] Failed to build FastSpider.
     pause 
     exit /b 
@@ -14,8 +12,6 @@ if %ERRORLEVEL% NEQ 0 (
 
 echo [2/3] Packaging FastScrape native library (Quiet)...
 cd ..\FastScrape
-call mvn clean package -DskipTests -q
-if %ERRORLEVEL% NEQ 0 ( 
     echo [ERROR] Failed to build FastScrape.
     pause 
     exit /b 
