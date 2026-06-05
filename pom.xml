@@ -7,7 +7,7 @@
 
     <groupId>com.github.andrestubbe</groupId>
     <artifactId>FastSpider</artifactId>
-    <version>0.1.0</version>
+    <version>v0.1.0</version>
     <packaging>jar</packaging>
 
     <name>FastSpider</name>
@@ -53,8 +53,8 @@
         <!-- FastCore - Unified JNI loader -->
         <dependency>
             <groupId>io.github.andrestubbe</groupId>
-            <artifactId>fastcore</artifactId>
-            <version>0.1.0</version>
+            <artifactId>FastCore</artifactId>
+            <version>v0.1.0</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
