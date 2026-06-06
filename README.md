@@ -1,7 +1,7 @@
-﻿# FastSpider v0.1.0 [ALPHA] — High-performance native WinHTTP web crawler for Java
+﻿# FastSpider 0.1.0 [ALPHA] — High-performance native WinHTTP web crawler for Java
 
 
-[![Status](https://img.shields.io/badge/status-v0.1.0-brightgreen.svg)](https://github.com/andrestubbe/FastSpider/releases/tag/v0.1.0)
+[![Status](https://img.shields.io/badge/status-0.1.0-brightgreen.svg)](https://github.com/andrestubbe/FastSpider/releases/tag/0.1.0)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
@@ -49,11 +49,11 @@ spider.fetchAsync("https://example.com")
 
 ---
 
-## 📊 Performance (v0.1.0)
+## 📊 Performance (0.1.0)
 
 Measured on **Intel/AMD x64 Hardware** with Windows 11.
 
-| Operation | Requests | Java HttpClient (Async) | FastSpider Native (v0.1.0) | Speedup |
+| Operation | Requests | Java HttpClient (Async) | FastSpider Native (0.1.0) | Speedup |
 |-----------|----------|-------------------------|---------------------------|---------|
 | **Concurrent Fetch** | 100 Req  | ~220 ms                 | **~120 ms**               | **1.8x** |
 | **Max Memory Overhead**| 100 Req  | ~84 MB                  | **~4 MB**                 | **21x** |
@@ -95,14 +95,14 @@ Add the JitPack repository and the dependencies to your `pom.xml`:
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>fastspider</artifactId>
-        <version>v0.1.0</version>
+        <version>0.1.0</version>
     </dependency>
 
     <!-- FastCore (Required Native Loader) -->
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>fastcore</artifactId>
-        <version>v0.1.0</version>
+        <version>0.1.0</version>
     </dependency>
 </dependencies>
 ```
@@ -114,16 +114,16 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:fastspider:v0.1.0'
-    implementation 'com.github.andrestubbe:fastcore:v0.1.0'
+    implementation 'com.github.andrestubbe:fastspider:0.1.0'
+    implementation 'com.github.andrestubbe:fastcore:0.1.0'
 }
 ```
 
 ### Option 3: Direct Download (No Build Tool)
 Download the latest JARs directly to add them to your classpath:
 
-1. 📦 **[fastspider-v0.1.0.jar](https://github.com/andrestubbe/FastSpider/releases/download/v0.1.0/fastspider-v0.1.0.jar)** (The Core Library)
-2. ⚙️ **[fastcore-v0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/v0.1.0/fastcore-v0.1.0.jar)** (The Mandatory Native Loader)
+1. 📦 **[fastspider-0.1.0.jar](https://github.com/andrestubbe/FastSpider/releases/download/0.1.0/fastspider-0.1.0.jar)** (The Core Library)
+2. ⚙️ **[fastcore-0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/0.1.0/fastcore-0.1.0.jar)** (The Mandatory Native Loader)
 
 > [!IMPORTANT]
 > All JARs must be in your classpath for the native JNI calls to function correctly.
@@ -175,7 +175,7 @@ MIT License — See [LICENSE](LICENSE) file for details.
 
 ## Related Projects
 - [FastCore](https://github.com/andrestubbe/FastCore) — Native Library Loader for Java
-- [FastKeyboard](https://github.com/andrestubbe/FastKeyboard) — High-performance RawInput engine
+- [FastSpider](https://github.com/andrestubbe/FastSpider) — High-performance RawInput engine
 - [FastTheme](https://github.com/andrestubbe/FastTheme) — Advanced UI styling engine
 
 ---
