@@ -1,4 +1,4 @@
-# FastSpider 0.1.0 [ALPHA-2026-06] — High-performance native WinHTTP web crawler for Java
+# FastSpider 0.1.0 [ALPHA-2026-06] â€” ï¿½ High-performance native WinHTTP web crawler for Java
 
 
 [![Status](https://img.shields.io/badge/status-0.1.0-brightgreen.svg)](https://github.com/andrestubbe/FastSpider/releases/tag/0.1.0)
@@ -18,7 +18,7 @@ FastSpider is the high-concurrency network crawling engine of the **FastJava** s
 
 
 ```java
-// Quick Start — Asynchronous Fetch
+// Quick Start ï¿½ Asynchronous Fetch
 FastSpider spider = FastSpider.open();
 
 spider.fetchAsync("https://example.com")
@@ -161,24 +161,24 @@ run-pipeline.bat
 
 ## Modular Ecosystem
 Combine FastSpider with other accelerators for maximum efficiency:
-* [**FastScrape**](https://github.com/andrestubbe/FastScrape) — Native SIMD HTML parser.
-* [**FastCore**](https://github.com/andrestubbe/FastCore) — Native loading substrate.
-* [**FastBytes**](https://github.com/andrestubbe/FastBytes) — Hardware-aligned byte arrays.
-* [**FastJSON**](https://github.com/andrestubbe/FastJSON) — SIMD-powered JSON parser.
+* [**FastScrape**](https://github.com/andrestubbe/FastScrape) ï¿½ Native SIMD HTML parser.
+* [**FastCore**](https://github.com/andrestubbe/FastCore) ï¿½ Native loading substrate.
+* [**FastBytes**](https://github.com/andrestubbe/FastBytes) ï¿½ Hardware-aligned byte arrays.
+* [**FastJSON**](https://github.com/andrestubbe/FastJSON) ï¿½ SIMD-powered JSON parser.
 
 ---
 
 ## License
-MIT License — See [LICENSE](LICENSE) file for details.
+MIT License ï¿½ See [LICENSE](LICENSE) file for details.
 
 ---
 
 ## Related Projects
-- [FastCore](https://github.com/andrestubbe/FastCore) — Native Library Loader for Java
-- [FastSpider](https://github.com/andrestubbe/FastSpider) — High-performance RawInput engine
-- [FastTheme](https://github.com/andrestubbe/FastTheme) — Advanced UI styling engine
+- [FastCore](https://github.com/andrestubbe/FastCore) ï¿½ Native Library Loader for Java
+- [FastSpider](https://github.com/andrestubbe/FastSpider) ï¿½ High-performance RawInput engine
+- [FastTheme](https://github.com/andrestubbe/FastTheme) ï¿½ Advanced UI styling engine
 
 ---
-**Part of the FastJava Ecosystem** — *Making the JVM faster.*
+**Part of the FastJava Ecosystem** ï¿½ *Making the JVM faster.*
 
 
