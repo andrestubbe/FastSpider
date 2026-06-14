@@ -1,4 +1,4 @@
-# FastSpider 0.1.0 [ALPHA-2026-06] — � High-performance native WinHTTP web crawler for Java
+﻿# FastSpider 0.1.0 [ALPHA] — High-performance native WinHTTP web crawler for Java
 
 
 [![Status](https://img.shields.io/badge/status-0.1.0-brightgreen.svg)](https://github.com/andrestubbe/FastSpider/releases/tag/0.1.0)
@@ -8,7 +8,7 @@
 [![JitPack](https://img.shields.io/badge/JitPack-ready-green.svg)](https://jitpack.io/#andrestubbe/FastSpider)
 
 
-**? High-performance native Windows WinHTTP web crawler powered by Java 17+ Virtual Threads.**
+**⚡ High-performance native Windows WinHTTP web crawler powered by Java 17+ Virtual Threads.**
 
 FastSpider is the high-concurrency network crawling engine of the **FastJava** stack. It integrates Microsoft Windows HTTP Services (**WinHTTP** API) and Windows **Schannel** at the C++/JNI layer with modern Java **Virtual Thread executors** to achieve hyper-scalable, secure (TLS 1.2/1.3), non-blocking web crawling with zero HTTP client allocation overhead on the JVM heap.
 
@@ -18,7 +18,7 @@ FastSpider is the high-concurrency network crawling engine of the **FastJava** s
 
 
 ```java
-// Quick Start � Asynchronous Fetch
+// Quick Start — Asynchronous Fetch
 FastSpider spider = FastSpider.open();
 
 spider.fetchAsync("https://example.com")
@@ -42,14 +42,14 @@ spider.fetchAsync("https://example.com")
 ---
 
 ## Key Features
-- **?? WinHTTP Enterprise Core**: Native Microsoft HTTP client that handles DNS, connection pooling, and secure TLS 1.3 handshakes automatically.
-- **?? Virtual Thread Scheduler**: Delegates blocking JNI network tasks to lightweight Java Virtual Threads for scalable asynchronous execution.
-- **? Built-in AVX2 Extractor**: Shares FastJava's AVX2 vectors to clean formatting and find links directly on the downloaded bytes.
-- **?? Zero-Heap Networking**: Avoids JVM connection descriptors, request buffers, and GC cycles for extreme request densities.
+- **🌐 WinHTTP Enterprise Core**: Native Microsoft HTTP client that handles DNS, connection pooling, and secure TLS 1.3 handshakes automatically.
+- **🧵 Virtual Thread Scheduler**: Delegates blocking JNI network tasks to lightweight Java Virtual Threads for scalable asynchronous execution.
+- **⚡ Built-in AVX2 Extractor**: Shares FastJava's AVX2 vectors to clean formatting and find links directly on the downloaded bytes.
+- **📦 Zero-Heap Networking**: Avoids JVM connection descriptors, request buffers, and GC cycles for extreme request densities.
 
 ---
 
-## ?? Performance (0.1.0)
+## 📊 Performance (0.1.0)
 
 Measured on **Intel/AMD x64 Hardware** with Windows 11.
 
@@ -67,10 +67,10 @@ Measured on **Intel/AMD x64 Hardware** with Windows 11.
 
 | Method | Description | Target Path |
 |--------|-------------|-------------|
-| `fetchAsync(...)` | Schedules a non-blocking asynchronous fetch inside the Virtual Thread Executor. | [Reference ?](docs/REFERENCE.md#fetchasync) |
-| `fetchBatch(...)` | Performs parallel concurrent page crawls and blocks until all complete. | [Reference ?](docs/REFERENCE.md#fetchbatch) |
-| `extractCleanText(...)` | Cleans document tags natively to yield readable text for LLMs. | [Reference ?](docs/REFERENCE.md#extractcleantext) |
-| `extractHrefs(...)` | Rapidly extracts all hyperlink targets from HTML page bytes natively. | [Reference ?](docs/REFERENCE.md#extracthrefs) |
+| `fetchAsync(...)` | Schedules a non-blocking asynchronous fetch inside the Virtual Thread Executor. | [Reference →](docs/REFERENCE.md#fetchasync) |
+| `fetchBatch(...)` | Performs parallel concurrent page crawls and blocks until all complete. | [Reference →](docs/REFERENCE.md#fetchbatch) |
+| `extractCleanText(...)` | Cleans document tags natively to yield readable text for LLMs. | [Reference →](docs/REFERENCE.md#extractcleantext) |
+| `extractHrefs(...)` | Rapidly extracts all hyperlink targets from HTML page bytes natively. | [Reference →](docs/REFERENCE.md#extracthrefs) |
 
 > [!TIP]
 > Use `FastSpider.open()` to obtain a thread-safe, reusable native crawler instance.
@@ -122,8 +122,8 @@ dependencies {
 ### Option 3: Direct Download (No Build Tool)
 Download the latest JARs directly to add them to your classpath:
 
-1. ?? **[fastspider-0.1.0.jar](https://github.com/andrestubbe/FastSpider/releases/download/0.1.0/fastspider-0.1.0.jar)** (The Core Library)
-2. ?? **[fastcore-0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/0.1.0/fastcore-0.1.0.jar)** (The Mandatory Native Loader)
+1. 📦 **[fastspider-0.1.0.jar](https://github.com/andrestubbe/FastSpider/releases/download/0.1.0/fastspider-0.1.0.jar)** (The Core Library)
+2. ⚙️ **[fastcore-0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/0.1.0/fastcore-0.1.0.jar)** (The Mandatory Native Loader)
 
 > [!IMPORTANT]
 > All JARs must be in your classpath for the native JNI calls to function correctly.
@@ -132,10 +132,10 @@ Download the latest JARs directly to add them to your classpath:
 ## Technical Examples & Hero Demos
 Explore the complete source configurations and benchmarks:
 
-* **? Interactive Demo**: [Demo.java](src/main/java/fastspider/Demo.java) (sets up an offline mock server, performs parallel fetches of delayed endpoints, and extracts content).
-* **? Joint Pipeline Demo**: [PipelineDemo.java](examples/PipelineDemo/src/main/java/fastpipeline/PipelineDemo.java) (orchestrates FastSpider and FastScrape in unison: fetches asynchronously via WinHTTP and parses HTML via AVX2 in a zero-copy pipeline).
-* **?? Performance Benchmark**: [Benchmark.java](src/main/java/fastspider/Benchmark.java) (races concurrent fetches against standard Java HttpClient).
-* **?? Test Suite**: [FastSpiderTest.java](src/test/java/fastspider/FastSpiderTest.java) (fully automated JUnit 5 crawler test suite).
+* **⚡ Interactive Demo**: [Demo.java](src/main/java/fastspider/Demo.java) (sets up an offline mock server, performs parallel fetches of delayed endpoints, and extracts content).
+* **⚡ Joint Pipeline Demo**: [PipelineDemo.java](examples/PipelineDemo/src/main/java/fastpipeline/PipelineDemo.java) (orchestrates FastSpider and FastScrape in unison: fetches asynchronously via WinHTTP and parses HTML via AVX2 in a zero-copy pipeline).
+* **📈 Performance Benchmark**: [Benchmark.java](src/main/java/fastspider/Benchmark.java) (races concurrent fetches against standard Java HttpClient).
+* **🧪 Test Suite**: [FastSpiderTest.java](src/test/java/fastspider/FastSpiderTest.java) (fully automated JUnit 5 crawler test suite).
 
 Run the hero demo locally from the command line:
 ```bash
@@ -153,32 +153,32 @@ run-pipeline.bat
 ## Platform Support
 | Platform | Status |
 |----------|--------|
-| Windows 10/11 (x64) | ? Fully Supported (WinHTTP + AVX2 Native) |
-| Linux | ?? Planned |
-| macOS | ?? Planned |
+| Windows 10/11 (x64) | ✅ Fully Supported (WinHTTP + AVX2 Native) |
+| Linux | 🚧 Planned |
+| macOS | 🚧 Planned |
 
 ---
 
 ## Modular Ecosystem
 Combine FastSpider with other accelerators for maximum efficiency:
-* [**FastScrape**](https://github.com/andrestubbe/FastScrape) � Native SIMD HTML parser.
-* [**FastCore**](https://github.com/andrestubbe/FastCore) � Native loading substrate.
-* [**FastBytes**](https://github.com/andrestubbe/FastBytes) � Hardware-aligned byte arrays.
-* [**FastJSON**](https://github.com/andrestubbe/FastJSON) � SIMD-powered JSON parser.
+* [**FastScrape**](https://github.com/andrestubbe/FastScrape) — Native SIMD HTML parser.
+* [**FastCore**](https://github.com/andrestubbe/FastCore) — Native loading substrate.
+* [**FastBytes**](https://github.com/andrestubbe/FastBytes) — Hardware-aligned byte arrays.
+* [**FastJSON**](https://github.com/andrestubbe/FastJSON) — SIMD-powered JSON parser.
 
 ---
 
 ## License
-MIT License � See [LICENSE](LICENSE) file for details.
+MIT License — See [LICENSE](LICENSE) file for details.
 
 ---
 
 ## Related Projects
-- [FastCore](https://github.com/andrestubbe/FastCore) � Native Library Loader for Java
-- [FastSpider](https://github.com/andrestubbe/FastSpider) � High-performance RawInput engine
-- [FastTheme](https://github.com/andrestubbe/FastTheme) � Advanced UI styling engine
+- [FastCore](https://github.com/andrestubbe/FastCore) — Native Library Loader for Java
+- [FastSpider](https://github.com/andrestubbe/FastSpider) — High-performance RawInput engine
+- [FastTheme](https://github.com/andrestubbe/FastTheme) — Advanced UI styling engine
 
 ---
-**Part of the FastJava Ecosystem** � *Making the JVM faster.*
+**Part of the FastJava Ecosystem** — *Making the JVM faster.*
 
 
