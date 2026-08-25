@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * High-Speed Visual BFS Tree & Stream Crawler Demo.
- * Uses FastANSI dark-gray (index 240) framing and ultra-crisp bold bright-white highlights for maximum contrast.
+ * 120-column single-line layout with pure dark-gray metadata and prominent bright-white URLs.
  */
 public class DemoBFS {
 
@@ -92,15 +92,12 @@ public class DemoBFS {
                 totalDiscoveredLinks.addAndGet(childs.size());
 
                 String tag = kwHits > 0 ? " " + boldWhite("[MATCH: " + kwHits + "x '" + SEARCH_KEYWORD + "']") : "";
+                String meta = String.format(" | HTTP %d | %,7d B | %4d ms | %,4d links",
+                        res.statusCode(), res.rawBody().length, res.fetchTimeMs(), childs.size());
 
                 synchronized (System.out) {
-                    System.out.printf("  %s %s %s\n",
-                            darkGray(branch), darkGray(String.format("[%02d]", index)), white(url));
-                    System.out.printf("  %s    %s HTTP %s %s %s B %s %s ms %s %s links%s\n",
-                            darkGray(subIndent), darkGray("STATUS:"), boldWhite(String.valueOf(res.statusCode())),
-                            darkGray("|"), boldWhite(String.format("%,d", res.rawBody().length)),
-                            darkGray("|"), boldWhite(String.format("%3d", res.fetchTimeMs())),
-                            darkGray("|"), boldWhite(String.format("%,d", childs.size())), tag);
+                    System.out.printf("  %s %s %-62s%s%s\n",
+                            darkGray(branch), darkGray(String.format("[%02d]", index)), white(url), darkGray(meta), tag);
 
                     // Stream 8 distinct live candidate links for intense visual flow
                     int streamPreview = Math.min(childs.size(), 8);
@@ -133,14 +130,13 @@ public class DemoBFS {
                         List<String> subChilds = filterWikiArticleLinks(subRaw);
                         totalDiscoveredLinks.addAndGet(subChilds.size());
 
+                        String subMeta = String.format(" | HTTP %d | %,7d B | %4d ms | %,4d links",
+                                subRes.statusCode(), subRes.rawBody().length, subRes.fetchTimeMs(), subChilds.size());
+
                         synchronized (System.out) {
-                            System.out.printf("  %s  ├── %s %s\n",
-                                    darkGray(subIndent), darkGray(String.format("[SUB-PAGE %03d]", subCrawledCount)), white(subUrl));
-                            System.out.printf("  %s  │    %s HTTP %s %s %s B %s %s ms %s %s links%s\n",
-                                    darkGray(subIndent), darkGray("STATUS:"), boldWhite(String.valueOf(subRes.statusCode())),
-                                    darkGray("|"), boldWhite(String.format("%,d", subRes.rawBody().length)),
-                                    darkGray("|"), boldWhite(String.format("%3d", subRes.fetchTimeMs())),
-                                    darkGray("|"), boldWhite(String.format("%,d", subChilds.size())), subTag);
+                            System.out.printf("  %s  ├── %s %-54s%s%s\n",
+                                    darkGray(subIndent), darkGray(String.format("[SUB %03d]", subCrawledCount)),
+                                    white(subUrl), darkGray(subMeta), subTag);
                         }
                     }));
                 }
@@ -165,7 +161,7 @@ public class DemoBFS {
     }
 
     private static String white(String text) {
-        return FastANSI.FG_WHITE + text + FastANSI.RESET;
+        return FastANSI.FG_BRIGHT_WHITE + text + FastANSI.RESET;
     }
 
     private static String boldWhite(String text) {

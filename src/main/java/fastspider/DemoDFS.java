@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 /**
  * Task-Driven DFS Pathfinder Demo (Hacker-Style Deep Descent Stream).
- * Uses FastANSI dark-gray (index 240) framing and bold bright-white highlights.
+ * 120-column single-line layout with pure dark-gray metadata and prominent bright-white URLs.
  */
 public class DemoDFS {
 
@@ -59,13 +59,12 @@ public class DemoDFS {
             }
 
             String matchNotice = containsTarget ? " " + boldWhite("*** TARGET CONCEPT DISCOVERED ('" + TARGET_TERM + "') ***") : "";
-            System.out.printf("%s%s %s %s\n",
-                    darkGray(indent.toString()), darkGray("└──"), darkGray(String.format("[Hop %02d]", depth)), white(currentUrl));
-            System.out.printf("%s    %s HTTP %s %s %s B %s %s ms %s (%s links)%s\n",
-                    darkGray(indent.toString()), darkGray("STATUS:"), boldWhite(String.valueOf(resp.statusCode())),
-                    darkGray("|"), boldWhite(String.format("%,d", resp.rawBody().length)),
-                    darkGray("|"), boldWhite(String.format("%3d", stepMs)),
-                    darkGray("|"), boldWhite(String.format("%,d", links.size())), matchNotice);
+            String meta = String.format(" | HTTP %d | %,7d B | %3d ms | %,d links",
+                    resp.statusCode(), resp.rawBody().length, stepMs, links.size());
+
+            System.out.printf("%s%s %s %-60s%s%s\n",
+                    darkGray(indent.toString()), darkGray("└──"), darkGray(String.format("[Hop %02d]", depth)),
+                    white(currentUrl), darkGray(meta), matchNotice);
 
             // Stream candidate links out in real time
             int previewCount = Math.min(links.size(), 6);
@@ -114,7 +113,7 @@ public class DemoDFS {
     }
 
     private static String white(String text) {
-        return FastANSI.FG_WHITE + text + FastANSI.RESET;
+        return FastANSI.FG_BRIGHT_WHITE + text + FastANSI.RESET;
     }
 
     private static String boldWhite(String text) {
