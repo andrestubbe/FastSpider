@@ -6,6 +6,8 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
 [![JitPack](https://img.shields.io/badge/JitPack-ready-green.svg)](https://jitpack.io/#andrestubbe/FastSpider)
 
+[![FastSpider Showcase](docs/screenshot.png)](https://youtu.be/PlLANMEbWPk)
+
 ---
 
 **⚡ High-performance native Windows WinHTTP web crawler powered by Java 17+ Virtual Threads, zero-allocation link filtering, and FastRegex integration.**
