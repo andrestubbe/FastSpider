@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * High-Speed Visual BFS Tree & Stream Crawler Demo.
- * 120-column single-line layout with pure dark-gray metadata and prominent bright-white URLs.
+ * Compact single-line output (strictly under 115 chars) to completely eliminate terminal wordwrap.
  */
 public class DemoBFS {
 
@@ -91,22 +91,22 @@ public class DemoBFS {
                 List<String> childs = filterWikiArticleLinks(rawHrefs);
                 totalDiscoveredLinks.addAndGet(childs.size());
 
-                String tag = kwHits > 0 ? " " + boldWhite("[MATCH: " + kwHits + "x '" + SEARCH_KEYWORD + "']") : "";
-                String meta = String.format(" | HTTP %d | %,7d B | %4d ms | %,4d links",
-                        res.statusCode(), res.rawBody().length, res.fetchTimeMs(), childs.size());
+                String tag = kwHits > 0 ? " " + boldWhite("[" + kwHits + "x]") : "";
+                String meta = String.format(" | %3d ms | %,4d links", res.fetchTimeMs(), childs.size());
+                String shortUrl = truncate(url, 48);
 
                 synchronized (System.out) {
-                    System.out.printf("  %s %s %-62s%s%s\n",
-                            darkGray(branch), darkGray(String.format("[%02d]", index)), white(url), darkGray(meta), tag);
+                    System.out.printf("  %s %s %-48s%s%s\n",
+                            darkGray(branch), darkGray(String.format("[%02d]", index)), white(shortUrl), darkGray(meta), tag);
 
                     // Stream 8 distinct live candidate links for intense visual flow
                     int streamPreview = Math.min(childs.size(), 8);
                     for (int s = 0; s < streamPreview; s++) {
-                        String lk = childs.get(s);
+                        String lk = truncate(childs.get(s), 65);
                         boolean isStreamLast = (s == streamPreview - 1);
                         String leaf = isStreamLast ? "└──" : "├──";
                         System.out.printf("  %s  %s %s -> %s\n",
-                                darkGray(subIndent), darkGray(leaf), darkGray(String.format("[LIVE LINK %02d]", s + 1)), darkGray(lk));
+                                darkGray(subIndent), darkGray(leaf), darkGray(String.format("[LINK %02d]", s + 1)), darkGray(lk));
                     }
                 }
 
@@ -123,20 +123,20 @@ public class DemoBFS {
                         int subCrawledCount = totalCrawled.incrementAndGet();
                         totalBytes.addAndGet(subRes.rawBody().length);
                         int kwSubHits = countKeywordHits(subRes.rawBody(), SEARCH_KEYWORD);
-                        String subTag = kwSubHits > 0 ? " " + boldWhite("[MATCH: " + kwSubHits + "x '" + SEARCH_KEYWORD + "']") : "";
+                        String subTag = kwSubHits > 0 ? " " + boldWhite("[" + kwSubHits + "x]") : "";
                         if (kwSubHits > 0) keywordMatches.incrementAndGet();
 
                         List<String> subRaw = spider.extractHrefs(subRes.rawBody());
                         List<String> subChilds = filterWikiArticleLinks(subRaw);
                         totalDiscoveredLinks.addAndGet(subChilds.size());
 
-                        String subMeta = String.format(" | HTTP %d | %,7d B | %4d ms | %,4d links",
-                                subRes.statusCode(), subRes.rawBody().length, subRes.fetchTimeMs(), subChilds.size());
+                        String subMeta = String.format(" | %3d ms | %,4d links", subRes.fetchTimeMs(), subChilds.size());
+                        String shortSub = truncate(subUrl, 44);
 
                         synchronized (System.out) {
-                            System.out.printf("  %s  ├── %s %-54s%s%s\n",
+                            System.out.printf("  %s  ├── %s %-44s%s%s\n",
                                     darkGray(subIndent), darkGray(String.format("[SUB %03d]", subCrawledCount)),
-                                    white(subUrl), darkGray(subMeta), subTag);
+                                    white(shortSub), darkGray(subMeta), subTag);
                         }
                     }));
                 }
@@ -154,6 +154,11 @@ public class DemoBFS {
         System.out.printf(" " + darkGray("Discovered ") + boldWhite(String.format("%,d", totalDiscoveredLinks.get())) + darkGray(" total hyperlinks across Wikipedia graph in real time!\n"));
         System.out.printf(" " + darkGray("Found ") + boldWhite(String.format("%,d", keywordMatches.get())) + darkGray(" pages with explicit '") + boldWhite(SEARCH_KEYWORD) + darkGray("' hardware acceleration references.\n"));
         System.out.println(darkGray("========================================================================================================================"));
+    }
+
+    private static String truncate(String text, int maxLen) {
+        if (text.length() <= maxLen) return text;
+        return text.substring(0, maxLen - 3) + "...";
     }
 
     private static String darkGray(String text) {
