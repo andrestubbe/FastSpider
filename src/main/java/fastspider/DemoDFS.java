@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 /**
  * Task-Driven DFS Pathfinder Demo (Hacker-Style Deep Descent Stream).
- * Uses FastANSI subtle Gray & White highlighting with dedicated telemetry lines to prevent word-wrap.
+ * Uses FastANSI dark-gray (index 240) framing and bold bright-white highlights.
  */
 public class DemoDFS {
 
@@ -22,10 +22,10 @@ public class DemoDFS {
     private static final Pattern HREF_PATTERN = Pattern.compile("href=\"/wiki/([^\"#:]+)\"");
 
     public static void main(String[] args) throws Exception {
-        System.out.println(gray("========================================================================================================================"));
-        System.out.println(" " + white("FastSpider") + gray(" — DFS Deep Dive Pathfinder Demo (High-Speed Recursive Navigation Stream)"));
-        System.out.println(gray(" MISSION: Auto-navigate Wikipedia hyperlink graph from '") + white(START_URL) + gray("' -> Domain containing '") + white(TARGET_TERM) + gray("'"));
-        System.out.println(gray("========================================================================================================================"));
+        System.out.println(darkGray("========================================================================================================================"));
+        System.out.println(" " + boldWhite("FastSpider") + darkGray(" — DFS Deep Dive Pathfinder Demo (High-Speed Recursive Navigation Stream)"));
+        System.out.println(darkGray(" MISSION: Auto-navigate Wikipedia hyperlink graph from '") + boldWhite(START_URL) + darkGray("' -> Domain containing '") + boldWhite(TARGET_TERM) + darkGray("'"));
+        System.out.println(darkGray("========================================================================================================================"));
         System.out.println();
 
         FastSpider spider = FastSpider.open();
@@ -36,7 +36,7 @@ public class DemoDFS {
         int totalHops = 0;
         int totalExtracted = 0;
 
-        System.out.println(gray("[Start 00] ") + white(currentUrl));
+        System.out.println(darkGray("[Start 00] ") + boldWhite(currentUrl));
 
         boolean targetFound = false;
 
@@ -58,22 +58,24 @@ public class DemoDFS {
                 indent.append("  ");
             }
 
-            String matchNotice = containsTarget ? " " + white("*** TARGET CONCEPT DISCOVERED ('" + TARGET_TERM + "') ***") : "";
+            String matchNotice = containsTarget ? " " + boldWhite("*** TARGET CONCEPT DISCOVERED ('" + TARGET_TERM + "') ***") : "";
             System.out.printf("%s%s %s %s\n",
-                    gray(indent.toString()), gray("└──"), gray(String.format("[Hop %02d]", depth)), white(currentUrl));
-            System.out.printf("%s    %s HTTP %d %s %,7d B %s %3d ms %s (%,d links)%s\n",
-                    gray(indent.toString()), gray("STATUS:"), resp.statusCode(), gray("|"),
-                    resp.rawBody().length, gray("|"), stepMs, gray("|"), links.size(), matchNotice);
+                    darkGray(indent.toString()), darkGray("└──"), darkGray(String.format("[Hop %02d]", depth)), white(currentUrl));
+            System.out.printf("%s    %s HTTP %s %s %s B %s %s ms %s (%s links)%s\n",
+                    darkGray(indent.toString()), darkGray("STATUS:"), boldWhite(String.valueOf(resp.statusCode())),
+                    darkGray("|"), boldWhite(String.format("%,d", resp.rawBody().length)),
+                    darkGray("|"), boldWhite(String.format("%3d", stepMs)),
+                    darkGray("|"), boldWhite(String.format("%,d", links.size())), matchNotice);
 
             // Stream candidate links out in real time
             int previewCount = Math.min(links.size(), 6);
             for (int p = 0; p < previewCount; p++) {
                 String lk = links.get(p);
                 boolean isLast = (p == previewCount - 1);
-                String tag = lk.contains(TARGET_TERM) ? " " + white("[★ TARGET CANDIDATE]") : "";
+                String tag = lk.contains(TARGET_TERM) ? " " + boldWhite("[★ TARGET CANDIDATE]") : "";
                 System.out.printf("%s    %s %s %s%s\n",
-                        gray(indent.toString()), gray(isLast ? "└──" : "├──"),
-                        gray(String.format("[CANDIDATE %02d]", p + 1)), gray(lk), tag);
+                        darkGray(indent.toString()), darkGray(isLast ? "└──" : "├──"),
+                        darkGray(String.format("[CANDIDATE %02d]", p + 1)), darkGray(lk), tag);
             }
 
             if (containsTarget && depth > 2) {
@@ -88,7 +90,7 @@ public class DemoDFS {
                     .orElseGet(() -> links.stream().filter(u -> !visited.contains(u)).findFirst().orElse(null));
 
             if (nextUrl == null) {
-                System.out.printf("%s    %s\n", gray(indent.toString()), gray("(Terminal branch reached - no further unexplored links)"));
+                System.out.printf("%s    %s\n", darkGray(indent.toString()), darkGray("(Terminal branch reached - no further unexplored links)"));
                 break;
             }
 
@@ -97,22 +99,26 @@ public class DemoDFS {
 
         long duration = System.currentTimeMillis() - t0;
         System.out.println();
-        System.out.println(gray("========================================================================================================================"));
+        System.out.println(darkGray("========================================================================================================================"));
         if (targetFound) {
-            System.out.printf(" " + white("SUCCESS:") + " Path connected to '" + white(TARGET_TERM) + "' in " + white("%,d ms") + " across " + white("%d") + " recursive branch hops!\n", duration, totalHops);
+            System.out.printf(" " + boldWhite("SUCCESS:") + darkGray(" Path connected to '") + boldWhite(TARGET_TERM) + darkGray("' in ") + boldWhite(String.format("%,d ms", duration)) + darkGray(" across ") + boldWhite(String.valueOf(totalHops)) + darkGray(" recursive branch hops!\n"));
         } else {
-            System.out.printf(" " + white("COMPLETE:") + " Navigated " + white("%d") + " hops in " + white("%,d ms") + " total.\n", totalHops, duration);
+            System.out.printf(" " + boldWhite("COMPLETE:") + darkGray(" Navigated ") + boldWhite(String.valueOf(totalHops)) + darkGray(" hops in ") + boldWhite(String.format("%,d ms", duration)) + darkGray(" total.\n"));
         }
-        System.out.printf(" Scanned " + white("%,d") + " total candidate hyperlinks in real-time.\n", totalExtracted);
-        System.out.println(gray("========================================================================================================================"));
+        System.out.printf(" " + darkGray("Scanned ") + boldWhite(String.format("%,d", totalExtracted)) + darkGray(" total candidate hyperlinks in real-time.\n"));
+        System.out.println(darkGray("========================================================================================================================"));
     }
 
-    private static String gray(String text) {
-        return FastANSI.FG_BRIGHT_BLACK + text + FastANSI.RESET;
+    private static String darkGray(String text) {
+        return FastANSI.fg(240) + text + FastANSI.RESET;
     }
 
     private static String white(String text) {
-        return FastANSI.FG_BRIGHT_WHITE + text + FastANSI.RESET;
+        return FastANSI.FG_WHITE + text + FastANSI.RESET;
+    }
+
+    private static String boldWhite(String text) {
+        return FastANSI.BOLD + FastANSI.FG_BRIGHT_WHITE + text + FastANSI.RESET;
     }
 
     private static List<String> extractAllWikiLinks(String html) {
