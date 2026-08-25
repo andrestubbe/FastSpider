@@ -4,7 +4,6 @@ import fastspider.FastSpider;
 import org.openjdk.jmh.annotations.*;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -41,13 +40,6 @@ public class FastSpiderJmhBenchmark {
             sampleHtmlBytes = buildSyntheticHtml();
         }
         sampleHtmlText = new String(sampleHtmlBytes, StandardCharsets.UTF_8);
-    }
-
-    @TearDown
-    public void tearDown() {
-        if (spider != null) {
-            spider.close();
-        }
     }
 
     @Benchmark
