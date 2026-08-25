@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Task-Driven DFS Pathfinder Demo (Hacker-Style Deep Descent Stream).
  * Uses native AVX2 link extraction to trace an ultra-deep 8+ hop path into a distant target topic.
+ * Clean, perfectly aligned recursive branch tree formatting.
  */
 public class DemoDFS {
 
@@ -53,17 +54,16 @@ public class DemoDFS {
             boolean isTargetPage = currentUrl.toLowerCase().contains(TARGET_TOPIC.toLowerCase());
 
             StringBuilder indent = new StringBuilder();
-            for (int d = 0; d < depth; d++) {
+            for (int d = 0; d < depth - 1; d++) {
                 indent.append("  ");
             }
 
             String matchNotice = isTargetPage ? " " + boldWhite("*** TARGET REACHED! ***") : "";
-            String meta = String.format(" | HTTP %d | %,7d B | %3d ms | %,d links",
-                    resp.statusCode(), resp.rawBody().length, stepMs, links.size());
-            String shortUrl = truncate(currentUrl, 52);
+            String meta = String.format(" -> %,d links", links.size());
+            String shortUrl = truncate(currentUrl, 56);
 
-            System.out.printf("%s%s %s %-52s%s%s\n",
-                    darkGray(indent.toString()), darkGray("└──"), darkGray(String.format("[Hop %02d]", depth)),
+            System.out.printf("%s└── %s %-56s%s%s\n",
+                    darkGray(indent.toString()), darkGray(String.format("[Hop %02d]", depth)),
                     white(shortUrl), darkGray(meta), matchNotice);
 
             // Stream candidate links out in real time
@@ -72,7 +72,7 @@ public class DemoDFS {
                 String lk = links.get(p);
                 boolean isLast = (p == previewCount - 1);
                 String tag = lk.toLowerCase().contains(TARGET_TOPIC.toLowerCase()) ? " " + boldWhite("[★ TARGET CANDIDATE]") : "";
-                String shortLk = truncate(lk, 65);
+                String shortLk = truncate(lk, 60);
                 System.out.printf("%s    %s %s %s%s\n",
                         darkGray(indent.toString()), darkGray(isLast ? "└──" : "├──"),
                         darkGray(String.format("[LINK %02d]", p + 1)), darkGray(shortLk), tag);
