@@ -1,5 +1,7 @@
 package fastspider;
 
+import fastansi.FastANSI;
+
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,8 +16,7 @@ import java.util.regex.Pattern;
 
 /**
  * High-Speed Visual BFS Tree & Stream Crawler Demo.
- * Fires concurrent WinHTTP requests across 100+ Wikipedia pages,
- * streaming thousands of discovered links directly through the console in real-time.
+ * Uses FastANSI subtle Gray & White highlighting for clean, high-contrast, professional visuals.
  */
 public class DemoBFS {
 
@@ -46,10 +47,10 @@ public class DemoBFS {
     );
 
     public static void main(String[] args) throws Exception {
-        System.out.println("========================================================================================================================");
-        System.out.println(" FastSpider — Massive BFS Real-Time Tree & Stream Crawler (WinHTTP Native + Virtual Threads)");
-        System.out.println(" MISSION: Live high-throughput network scan discovering 5,000+ branch links and hardware vector references");
-        System.out.println("========================================================================================================================");
+        System.out.println(gray("========================================================================================================================"));
+        System.out.println(" " + white("FastSpider") + gray(" — Massive BFS Real-Time Tree & Stream Crawler (WinHTTP Native + Virtual Threads)"));
+        System.out.println(gray(" MISSION: Live high-throughput network scan discovering 5,000+ branch links and hardware vector references"));
+        System.out.println(gray("========================================================================================================================"));
         System.out.println();
 
         FastSpider spider = FastSpider.open();
@@ -61,9 +62,9 @@ public class DemoBFS {
 
         long t0 = System.currentTimeMillis();
 
-        System.out.printf("[Root Stream] Spawning %d concurrent crawler workers on Java Virtual Threads...\n\n", SEED_PAGES.size());
+        System.out.println(gray("[Root Stream] Spawning ") + white(String.valueOf(SEED_PAGES.size())) + gray(" concurrent crawler workers on Java Virtual Threads...\n"));
 
-        // Level 1: Progressive Live Stream as requests arrive
+        // Level 1: Progressive Live Stream
         List<CompletableFuture<Void>> level1Futures = new ArrayList<>();
         List<CompletableFuture<Void>> level2Futures = Collections.synchronizedList(new ArrayList<>());
 
@@ -83,12 +84,13 @@ public class DemoBFS {
                 List<String> childs = extractHrefLinks(res.rawBody());
                 totalDiscoveredLinks.addAndGet(childs.size());
 
-                String tag = kwHits > 0 ? " [MATCH: " + kwHits + "x '" + SEARCH_KEYWORD + "']" : "";
+                String tag = kwHits > 0 ? " " + white("[MATCH: " + kwHits + "x '" + SEARCH_KEYWORD + "']") : "";
 
                 synchronized (System.out) {
-                    System.out.printf("  %s [%02d] %-66s | HTTP %d | %,7d B | %3d ms | %,d links%s\n",
-                            branch, index, url, res.statusCode(),
-                            res.rawBody().length, res.fetchTimeMs(), childs.size(), tag);
+                    System.out.printf("  %s %s %-66s %s HTTP %d %s %,7d B %s %3d ms %s %,d links%s\n",
+                            gray(branch), gray(String.format("[%02d]", index)), white(url),
+                            gray("|"), res.statusCode(), gray("|"), res.rawBody().length,
+                            gray("|"), res.fetchTimeMs(), gray("|"), childs.size(), tag);
 
                     // Stream 6 live candidate links for intense hacker-style output
                     int streamPreview = Math.min(childs.size(), 6);
@@ -96,7 +98,8 @@ public class DemoBFS {
                         String lk = childs.get(s);
                         boolean isStreamLast = (s == streamPreview - 1);
                         String leaf = isStreamLast ? "└──" : "├──";
-                        System.out.printf("  %s  %s [LIVE LINK %02d] -> %s\n", subIndent, leaf, s + 1, lk);
+                        System.out.printf("  %s  %s %s -> %s\n",
+                                gray(subIndent), gray(leaf), gray(String.format("[LIVE LINK %02d]", s + 1)), gray(lk));
                     }
                 }
 
@@ -113,16 +116,17 @@ public class DemoBFS {
                         int subCrawledCount = totalCrawled.incrementAndGet();
                         totalBytes.addAndGet(subRes.rawBody().length);
                         int kwSubHits = countKeywordHits(subRes.rawBody(), SEARCH_KEYWORD);
-                        String subTag = kwSubHits > 0 ? " [MATCH: " + kwSubHits + "x '" + SEARCH_KEYWORD + "']" : "";
+                        String subTag = kwSubHits > 0 ? " " + white("[MATCH: " + kwSubHits + "x '" + SEARCH_KEYWORD + "']") : "";
                         if (kwSubHits > 0) keywordMatches.incrementAndGet();
 
                         List<String> subChilds = extractHrefLinks(subRes.rawBody());
                         totalDiscoveredLinks.addAndGet(subChilds.size());
 
                         synchronized (System.out) {
-                            System.out.printf("  %s  ├── [SUB-PAGE %03d] %-58s | HTTP %d | %,7d B | %3d ms | %,d links%s\n",
-                                    subIndent, subCrawledCount, subUrl, subRes.statusCode(),
-                                    subRes.rawBody().length, subRes.fetchTimeMs(), subChilds.size(), subTag);
+                            System.out.printf("  %s  %s %s %-58s %s HTTP %d %s %,7d B %s %3d ms %s %,d links%s\n",
+                                    gray(subIndent), gray("├──"), gray(String.format("[SUB-PAGE %03d]", subCrawledCount)),
+                                    white(subUrl), gray("|"), subRes.statusCode(), gray("|"),
+                                    subRes.rawBody().length, gray("|"), subRes.fetchTimeMs(), gray("|"), subChilds.size(), subTag);
                         }
                     }));
                 }
@@ -135,13 +139,21 @@ public class DemoBFS {
         long duration = System.currentTimeMillis() - t0;
 
         System.out.println();
-        System.out.println("========================================================================================================================");
-        System.out.printf(" MISSION COMPLETE: Crawled %,d live pages (%,.2f MB) in %,d ms (%,.1f pages/sec)\n",
+        System.out.println(gray("========================================================================================================================"));
+        System.out.printf(" " + white("MISSION COMPLETE:") + " Crawled " + white("%,d") + " live pages (" + white("%,.2f MB") + ") in " + white("%,d ms") + " (" + white("%,.1f pages/sec") + ")\n",
                 totalCrawled.get(), (totalBytes.get() / (1024.0 * 1024.0)), duration,
                 (totalCrawled.get() / (duration / 1000.0)));
-        System.out.printf(" Discovered %,d total hyperlinks across Wikipedia graph in real time!\n", totalDiscoveredLinks.get());
-        System.out.printf(" Found %,d pages with explicit '%s' hardware acceleration references.\n", keywordMatches.get(), SEARCH_KEYWORD);
-        System.out.println("========================================================================================================================");
+        System.out.printf(" Discovered " + white("%,d") + " total hyperlinks across Wikipedia graph in real time!\n", totalDiscoveredLinks.get());
+        System.out.printf(" Found " + white("%,d") + " pages with explicit '%s' hardware acceleration references.\n", keywordMatches.get(), SEARCH_KEYWORD);
+        System.out.println(gray("========================================================================================================================"));
+    }
+
+    private static String gray(String text) {
+        return FastANSI.FG_BRIGHT_BLACK + text + FastANSI.RESET;
+    }
+
+    private static String white(String text) {
+        return FastANSI.FG_BRIGHT_WHITE + text + FastANSI.RESET;
     }
 
     private static int countKeywordHits(byte[] body, String keyword) {
