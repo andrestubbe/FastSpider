@@ -6,9 +6,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Hero Demo — clean terminal crawler using real Wikipedia pages.
- * Showcases native WinHTTP fetching, Virtual Thread concurrency,
- * and AVX2 link extraction with clean, neutral terminal output.
+ * Compact Base Demo — Validates native WinHTTP fetch, Virtual Thread concurrency,
+ * and AVX2 link extraction with clean neutral output.
  */
 public class Demo {
 

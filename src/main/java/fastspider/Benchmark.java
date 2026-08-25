@@ -3,18 +3,25 @@ package fastspider;
 import fastregex.FastRegex;
 import fastregex.MatchResult;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Benchmark suite comparing FastSpider AVX2 extraction with standard JDK Pattern matching.
+ */
 public class Benchmark {
 
+    private Benchmark() {}
+
+    private static final Pattern HREF_PATTERN = Pattern.compile("href=\"([^\"]+)\"");
+
+    /**
+     * Executes the link extraction benchmark suite.
+     *
+     * @param args command line arguments
+     * @throws Exception if network fetch or regex execution fails
+     */
     public static void main(String[] args) throws Exception {
         System.out.println("==================================================================");
         System.out.println(" FastSpider & FastRegex Link Extraction Benchmark Suite");
@@ -33,23 +40,20 @@ public class Benchmark {
         int iterations = 200;
 
         // 2. JDK Pattern Matcher link extraction
-        Pattern hrefPattern = Pattern.compile("href=\"([^\"]+)\"");
         System.out.println("Running JDK java.util.regex.Pattern link extraction benchmark...");
         for (int i = 0; i < warmup; i++) {
-            runJdkRegex(htmlText, hrefPattern);
+            runJdkRegex(htmlText, HREF_PATTERN);
         }
         long t0 = System.nanoTime();
         int totalJdkLinks = 0;
         for (int i = 0; i < iterations; i++) {
-            totalJdkLinks += runJdkRegex(htmlText, hrefPattern);
+            totalJdkLinks += runJdkRegex(htmlText, HREF_PATTERN);
         }
         long jdkNanos = System.nanoTime() - t0;
         double jdkOpsPerMs = (double) iterations / (jdkNanos / 1_000_000.0);
         double jdkAvgMs = (jdkNanos / 1_000_000.0) / iterations;
 
         // 3. FastSpider + FastRegex Zero-Allocation Scanner
-        FastRegex fastRegex = FastRegex.compile("href=\"[^\"]+\"");
-        MatchResult matchResult = new MatchResult();
         System.out.println("Running FastSpider native AVX2 + FastRegex zero-allocation extraction...");
         for (int i = 0; i < warmup; i++) {
             spider.extractHrefs(htmlBytes);
