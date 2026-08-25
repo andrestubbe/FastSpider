@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * High-Speed Visual BFS Tree & Stream Crawler Demo.
- * Compact single-line output (strictly under 115 chars) to completely eliminate terminal wordwrap.
+ * Continuous guide lines (│), prominent white index badges, and scaled sub-crawl (200+ pages target).
  */
 public class DemoBFS {
 
@@ -46,7 +46,7 @@ public class DemoBFS {
     public static void main(String[] args) throws Exception {
         System.out.println(darkGray("========================================================================================================================"));
         System.out.println(" " + boldWhite("FastSpider") + darkGray(" — Massive BFS Real-Time Tree & Stream Crawler (WinHTTP Native + Virtual Threads)"));
-        System.out.println(darkGray(" MISSION: Live high-throughput network scan discovering 10,000+ branch links and hardware vector references"));
+        System.out.println(darkGray(" MISSION: Live high-throughput network scan discovering 20,000+ branch links and hardware vector references"));
         System.out.println(darkGray("========================================================================================================================"));
         System.out.println();
 
@@ -54,7 +54,7 @@ public class DemoBFS {
         for (int i = 0; i < SEED_PAGES.size(); i++) {
             boolean isLast = (i == SEED_PAGES.size() - 1);
             String branch = isLast ? "└──" : "├──";
-            System.out.printf("  %s %s %s\n", darkGray(branch), darkGray(String.format("[%02d]", i + 1)), white(SEED_PAGES.get(i)));
+            System.out.printf("  %s %s %s\n", darkGray(branch), boldWhite(String.format("[%02d]", i + 1)), white(SEED_PAGES.get(i)));
         }
         System.out.println();
         System.out.println(darkGray("[Root Stream] Spawning ") + boldWhite(String.valueOf(SEED_PAGES.size())) + darkGray(" concurrent crawler workers on Java Virtual Threads...\n"));
@@ -76,9 +76,8 @@ public class DemoBFS {
             final int index = i + 1;
             final String url = SEED_PAGES.get(i);
             visited.add(url);
-            final boolean isLast = (i == SEED_PAGES.size() - 1);
-            final String branch = isLast ? "└──" : "├──";
-            final String subIndent = isLast ? "   " : "│  ";
+            final String branch = "├──";
+            final String subIndent = "│  ";
 
             level1Futures.add(spider.fetchAsync(url).thenAccept(res -> {
                 int crawledCount = totalCrawled.incrementAndGet();
@@ -97,7 +96,7 @@ public class DemoBFS {
 
                 synchronized (System.out) {
                     System.out.printf("  %s %s %-48s%s%s\n",
-                            darkGray(branch), darkGray(String.format("[%02d]", index)), white(shortUrl), darkGray(meta), tag);
+                            darkGray(branch), boldWhite(String.format("[%02d]", index)), white(shortUrl), darkGray(meta), tag);
 
                     // Stream 8 distinct live candidate links for intense visual flow
                     int streamPreview = Math.min(childs.size(), 8);
@@ -106,14 +105,14 @@ public class DemoBFS {
                         boolean isStreamLast = (s == streamPreview - 1);
                         String leaf = isStreamLast ? "└──" : "├──";
                         System.out.printf("  %s  %s %s -> %s\n",
-                                darkGray(subIndent), darkGray(leaf), darkGray(String.format("[LINK %02d]", s + 1)), darkGray(lk));
+                                darkGray(subIndent), darkGray(leaf), boldWhite(String.format("[LINK %02d]", s + 1)), darkGray(lk));
                     }
                 }
 
-                // Sub-Page parallel fetch (pick 3 distinct sub-links to crawl)
+                // Sub-Page parallel fetch (pick 9 distinct sub-links to crawl per seed -> ~200 total pages)
                 List<String> subToCrawl = childs.stream()
                         .filter(u -> !visited.contains(u))
-                        .limit(3)
+                        .limit(9)
                         .toList();
 
                 for (String subUrl : subToCrawl) {
@@ -135,7 +134,7 @@ public class DemoBFS {
 
                         synchronized (System.out) {
                             System.out.printf("  %s  ├── %s %-44s%s%s\n",
-                                    darkGray(subIndent), darkGray(String.format("[SUB %03d]", subCrawledCount)),
+                                    darkGray(subIndent), boldWhite(String.format("[SUB %03d]", subCrawledCount)),
                                     white(shortSub), darkGray(subMeta), subTag);
                         }
                     }));

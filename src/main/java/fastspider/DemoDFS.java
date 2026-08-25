@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Task-Driven DFS Pathfinder Demo (Hacker-Style Deep Descent Stream).
  * Uses native AVX2 link extraction to trace an ultra-deep 20+ hop path across hundreds of live streaming candidates.
+ * Clean, perfectly aligned recursive branch tree formatting with bright-white index badges.
  */
 public class DemoDFS {
 
@@ -62,7 +63,7 @@ public class DemoDFS {
             String shortUrl = truncate(currentUrl, 56);
 
             System.out.printf("%s└── %s %-56s%s%s\n",
-                    darkGray(indent.toString()), darkGray(String.format("[Hop %02d]", depth)),
+                    darkGray(indent.toString()), boldWhite(String.format("[Hop %02d]", depth)),
                     white(shortUrl), darkGray(meta), matchNotice);
 
             // Stream 15 live candidate links per hop to show extensive real-time action (200+ links total stream)
@@ -74,7 +75,7 @@ public class DemoDFS {
                 String shortLk = truncate(lk, 60);
                 System.out.printf("%s    %s %s %s%s\n",
                         darkGray(indent.toString()), darkGray(isLast ? "└──" : "├──"),
-                        darkGray(String.format("[LINK %02d]", p + 1)), darkGray(shortLk), tag);
+                        boldWhite(String.format("[LINK %02d]", p + 1)), darkGray(shortLk), tag);
             }
 
             if (isTargetPage && depth >= 15) {
