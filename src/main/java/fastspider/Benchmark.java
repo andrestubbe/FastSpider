@@ -10,15 +10,18 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Multi-Tier Comparative Benchmark Suite for FastSpider vs Standard Java Stacks.
- * Evaluates Link Extraction, Concurrent Batch Crawling, and Plaintext Extraction with direct Head-to-Head comparisons.
+ * Evaluates Link Extraction, Concurrent 200-Page Massive Crawling, and Plaintext Extraction with direct Head-to-Head comparisons.
  */
 public class Benchmark {
 
@@ -26,7 +29,7 @@ public class Benchmark {
 
     private static final Pattern HREF_PATTERN = Pattern.compile("href=\"([^\"]+)\"");
 
-    private static final List<String> BENCHMARK_BATCH_URLS = List.of(
+    private static final List<String> ROOT_SEEDS = List.of(
         "https://en.wikipedia.org/wiki/SIMD",
         "https://en.wikipedia.org/wiki/Advanced_Vector_Extensions",
         "https://en.wikipedia.org/wiki/AVX-512",
@@ -36,7 +39,17 @@ public class Benchmark {
         "https://en.wikipedia.org/wiki/Graphics_processing_unit",
         "https://en.wikipedia.org/wiki/General-purpose_computing_on_graphics_processing_units",
         "https://en.wikipedia.org/wiki/CUDA",
-        "https://en.wikipedia.org/wiki/OpenCL"
+        "https://en.wikipedia.org/wiki/OpenCL",
+        "https://en.wikipedia.org/wiki/Java_(programming_language)",
+        "https://en.wikipedia.org/wiki/C%2B%2B",
+        "https://en.wikipedia.org/wiki/Rust_(programming_language)",
+        "https://en.wikipedia.org/wiki/Go_(programming_language)",
+        "https://en.wikipedia.org/wiki/Julia_(programming_language)",
+        "https://en.wikipedia.org/wiki/Fortran",
+        "https://en.wikipedia.org/wiki/Assembly_language",
+        "https://en.wikipedia.org/wiki/Compiler",
+        "https://en.wikipedia.org/wiki/Just-in-time_compilation",
+        "https://en.wikipedia.org/wiki/Parallel_computing"
     );
 
     public static void main(String[] args) throws Exception {
@@ -95,29 +108,51 @@ public class Benchmark {
         System.out.printf(darkGray(" Extracted ") + boldWhite("%,d links") + darkGray(" per iteration across %,d iterations.\n\n"), totalFastLinks / iterations, iterations);
 
         // ─────────────────────────────────────────────────────────────────────
-        // Tier 2: Concurrent Multi-Threaded Batch Crawl Benchmark
+        // Tier 2: Concurrent Multi-Threaded Batch Crawl Benchmark (Scaled to 200 Nodes)
         // ─────────────────────────────────────────────────────────────────────
-        System.out.println(darkGray("[Tier 2]") + " " + boldWhite("Concurrent Batch Crawl Benchmark") + darkGray(" (10 Parallel Architecture Nodes)"));
-        
-        // Warmup connections
-        spider.fetchAsync("https://en.wikipedia.org/wiki/SIMD").join();
+        System.out.println(darkGray("[Tier 2]") + " " + boldWhite("Concurrent Batch Crawl Benchmark") + darkGray(" (200 Parallel Architecture Nodes)"));
+        System.out.print(darkGray(" Pre-building 200 distinct test URLs from live architecture branches ... "));
 
-        // 2a. JDK Standard HttpClient Batch
-        HttpClient jdkClient = HttpClient.newBuilder().build();
+        // Build 200 unique URLs from 20 seeds (10 URLs per seed)
+        List<String> crawlUrls = new ArrayList<>(200);
+        Set<String> visitedSet = ConcurrentHashMap.newKeySet();
+        for (String seed : ROOT_SEEDS) {
+            crawlUrls.add(seed);
+            visitedSet.add(seed);
+        }
+        for (String seed : ROOT_SEEDS) {
+            FastSpider.SpiderResponse seedResp = spider.fetchAsync(seed).join();
+            List<String> validLinks = filterWikiArticleLinks(spider.extractHrefs(seedResp.rawBody()));
+            int added = 0;
+            for (String lk : validLinks) {
+                if (visitedSet.add(lk)) {
+                    crawlUrls.add(lk);
+                    added++;
+                    if (added >= 9 || crawlUrls.size() >= 200) break;
+                }
+            }
+            if (crawlUrls.size() >= 200) break;
+        }
+        System.out.printf(darkGray("OK (") + boldWhite("%,d URLs") + darkGray(")\n"), crawlUrls.size());
+
+        // 2a. JDK Standard HttpClient Concurrent Batch
+        HttpClient jdkClient = HttpClient.newBuilder()
+                .executor(Executors.newVirtualThreadPerTaskExecutor())
+                .build();
         long jdkBatchT0 = System.currentTimeMillis();
         List<CompletableFuture<HttpResponse<byte[]>>> jdkFutures = new ArrayList<>();
-        for (String url : BENCHMARK_BATCH_URLS) {
+        for (String url : crawlUrls) {
             HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).header("User-Agent", "FastSpider-Benchmark/0.1").build();
             jdkFutures.add(jdkClient.sendAsync(req, HttpResponse.BodyHandlers.ofByteArray()));
         }
         CompletableFuture.allOf(jdkFutures.toArray(new CompletableFuture[0])).join();
         long jdkBatchDuration = System.currentTimeMillis() - jdkBatchT0;
-        double jdkPagesPerSec = BENCHMARK_BATCH_URLS.size() / (jdkBatchDuration / 1000.0);
+        double jdkPagesPerSec = crawlUrls.size() / (Math.max(jdkBatchDuration, 1) / 1000.0);
 
-        // 2b. FastSpider Native WinHTTP Batch
+        // 2b. FastSpider Native WinHTTP Concurrent Batch
         long fastBatchT0 = System.currentTimeMillis();
         List<CompletableFuture<FastSpider.SpiderResponse>> fastFutures = new ArrayList<>();
-        for (String url : BENCHMARK_BATCH_URLS) {
+        for (String url : crawlUrls) {
             fastFutures.add(spider.fetchAsync(url));
         }
         CompletableFuture.allOf(fastFutures.toArray(new CompletableFuture[0])).join();
@@ -132,17 +167,17 @@ public class Benchmark {
         }
 
         double mbDownloaded = totalDownloadedBytes / (1024.0 * 1024.0);
-        double fastPagesPerSec = BENCHMARK_BATCH_URLS.size() / (fastBatchDuration / 1000.0);
-        double crawlSpeedup = (double) jdkBatchDuration / fastBatchDuration;
+        double fastPagesPerSec = crawlUrls.size() / (Math.max(fastBatchDuration, 1) / 1000.0);
+        double crawlSpeedup = (double) jdkBatchDuration / Math.max(fastBatchDuration, 1);
 
         System.out.println();
         System.out.println(darkGray("------------------------------------------------------------------------------------------------------------------------"));
-        System.out.printf(" %-48s | %-22s | %-20s | %-20s\n", "Parallel Crawler", "Batch Duration", "Throughput", "Speedup");
+        System.out.printf(" %-48s | %-22s | %-20s | %-20s\n", "Parallel Crawler (200 Pages)", "Batch Duration", "Throughput", "Speedup");
         System.out.println(darkGray("------------------------------------------------------------------------------------------------------------------------"));
         System.out.printf(" %-48s | %19d ms | %15.1f p/s | %s\n", "Standard java.net.http.HttpClient", jdkBatchDuration, jdkPagesPerSec, darkGray("1.00x Base          "));
         System.out.printf(" %-48s | %19d ms | %15.1f p/s | %s\n", "FastSpider Native WinHTTP + Virtual Threads", fastBatchDuration, fastPagesPerSec, boldWhite(String.format("%.2fx Faster         ", crawlSpeedup)));
         System.out.println(darkGray("------------------------------------------------------------------------------------------------------------------------"));
-        System.out.printf(darkGray(" Downloaded ") + boldWhite(String.format("%.2f MB", mbDownloaded)) + darkGray(" and discovered ") + boldWhite(String.format("%,d links", totalLinksDiscovered)) + darkGray(" in real-time.\n\n"));
+        System.out.printf(darkGray(" Downloaded ") + boldWhite(String.format("%.2f MB", mbDownloaded)) + darkGray(" and discovered ") + boldWhite(String.format("%,d links", totalLinksDiscovered)) + darkGray(" across 200 nodes in real-time.\n\n"));
 
         // ─────────────────────────────────────────────────────────────────────
         // Tier 3: Zero-Allocation Native Plaintext Extraction & Tag Stripper
@@ -188,6 +223,25 @@ public class Benchmark {
         System.out.println(darkGray("========================================================================================================================"));
         System.out.printf(" " + boldWhite("BENCHMARK VERDICT:") + darkGray(" FastSpider outperforms JDK across all tiers (") + boldWhite(String.format("Link Extraction: %.2fx", extractSpeedup)) + darkGray(" | ") + boldWhite(String.format("Batch Crawl: %.2fx", crawlSpeedup)) + darkGray(" | ") + boldWhite(String.format("CleanText: %.2fx", stripSpeedup)) + darkGray(").\n"));
         System.out.println(darkGray("========================================================================================================================"));
+    }
+
+    private static List<String> filterWikiArticleLinks(List<String> rawHrefs) {
+        List<String> links = new ArrayList<>();
+        for (String href : rawHrefs) {
+            if (href == null || href.isEmpty()) continue;
+            if (href.startsWith("/wiki/")) {
+                String sub = href.substring(6);
+                if (!sub.contains(":") && !sub.contains("#") && !sub.contains("?") && !sub.equals("Main_Page")) {
+                    links.add("https://en.wikipedia.org" + href);
+                }
+            } else if (href.startsWith("https://en.wikipedia.org/wiki/")) {
+                String sub = href.substring(30);
+                if (!sub.contains(":") && !sub.contains("#") && !sub.contains("?") && !sub.equals("Main_Page")) {
+                    links.add(href);
+                }
+            }
+        }
+        return links;
     }
 
     private static String darkGray(String text) {
