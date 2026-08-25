@@ -1,18 +1,15 @@
 @echo off
 setlocal
 cd /d "%~dp0"
-set "MAVEN_OPTS=--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -Dorg.slf4j.simpleLogger.defaultLogLevel=warn"
-echo =========================================================================
-echo  FastSpider DFS Pathfinder — Deep Descent & 6-Degrees Navigation Demo
-echo =========================================================================
+chcp 65001 > nul
+set "MAVEN_OPTS=--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -Dorg.slf4j.simpleLogger.defaultLogLevel=error"
 
-call "C:\Users\andre\tools\apache-maven-3.9.9\bin\mvn.cmd" -q -Dorg.slf4j.simpleLogger.defaultLogLevel=warn test-compile
+call "C:\Users\andre\tools\apache-maven-3.9.9\bin\mvn.cmd" -q -Dorg.slf4j.simpleLogger.defaultLogLevel=error test-compile 2>nul
 if %ERRORLEVEL% NEQ 0 (
-    echo [ERROR] Build failed!
+    call "C:\Users\andre\tools\apache-maven-3.9.9\bin\mvn.cmd" -q test-compile
     pause
     exit /b %ERRORLEVEL%
 )
 
-echo [FastSpider] Running DFS Pathfinder...
-call "C:\Users\andre\tools\apache-maven-3.9.9\bin\mvn.cmd" -q exec:java "-Dexec.mainClass=fastspider.DemoDFS" "-Dexec.args=" "-Dexec.vmArgs=--enable-native-access=ALL-UNNAMED"
+call "C:\Users\andre\tools\apache-maven-3.9.9\bin\mvn.cmd" -q exec:java "-Dexec.mainClass=fastspider.DemoDFS" "-Dexec.args=" "-Dexec.vmArgs=--enable-native-access=ALL-UNNAMED" 2>nul
 pause

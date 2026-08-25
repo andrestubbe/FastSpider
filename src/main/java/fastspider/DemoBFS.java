@@ -13,20 +13,42 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * High-Speed Visual BFS Tree Crawler Demo (Hacker-Style Stream).
- * Rushes through thousands of discovered links in real-time, displaying
- * live tree branches, SIMD keyword matches, and full telemetry.
+ * High-Speed Visual BFS Tree & Stream Crawler Demo.
+ * Fires concurrent WinHTTP requests across 100+ Wikipedia pages,
+ * streaming thousands of discovered links directly through the console in real-time.
  */
 public class DemoBFS {
 
-    private static final String ROOT_URL = "https://en.wikipedia.org/wiki/Computer_science";
-    private static final String SEARCH_KEYWORD = "SIMD";
+    private static final String SEARCH_KEYWORD = "vector";
     private static final Pattern HREF_PATTERN = Pattern.compile("href=\"/wiki/([^\"#:]+)\"");
+
+    private static final List<String> SEED_PAGES = List.of(
+        "https://en.wikipedia.org/wiki/SIMD",
+        "https://en.wikipedia.org/wiki/Advanced_Vector_Extensions",
+        "https://en.wikipedia.org/wiki/AVX-512",
+        "https://en.wikipedia.org/wiki/Streaming_SIMD_Extensions",
+        "https://en.wikipedia.org/wiki/ARM_architecture_family",
+        "https://en.wikipedia.org/wiki/RISC-V",
+        "https://en.wikipedia.org/wiki/Graphics_processing_unit",
+        "https://en.wikipedia.org/wiki/General-purpose_computing_on_graphics_processing_units",
+        "https://en.wikipedia.org/wiki/CUDA",
+        "https://en.wikipedia.org/wiki/OpenCL",
+        "https://en.wikipedia.org/wiki/Java_(programming_language)",
+        "https://en.wikipedia.org/wiki/C%2B%2B",
+        "https://en.wikipedia.org/wiki/Rust_(programming_language)",
+        "https://en.wikipedia.org/wiki/Go_(programming_language)",
+        "https://en.wikipedia.org/wiki/Julia_(programming_language)",
+        "https://en.wikipedia.org/wiki/Fortran",
+        "https://en.wikipedia.org/wiki/Assembly_language",
+        "https://en.wikipedia.org/wiki/Compiler",
+        "https://en.wikipedia.org/wiki/Just-in-time_compilation",
+        "https://en.wikipedia.org/wiki/Parallel_computing"
+    );
 
     public static void main(String[] args) throws Exception {
         System.out.println("========================================================================================================================");
-        System.out.println(" FastSpider — Massive BFS Real-Time Tree & Stream Crawler (WinHTTP + Virtual Threads)");
-        System.out.println(" MISSION: Live scan of Wikipedia network graph discovering 5,000+ branch links in seconds");
+        System.out.println(" FastSpider — Massive BFS Real-Time Tree & Stream Crawler (WinHTTP Native + Virtual Threads)");
+        System.out.println(" MISSION: Live high-throughput network scan discovering 5,000+ branch links and hardware vector references");
         System.out.println("========================================================================================================================");
         System.out.println();
 
@@ -34,96 +56,82 @@ public class DemoBFS {
         Set<String> visited = ConcurrentHashMap.newKeySet();
         AtomicInteger totalCrawled = new AtomicInteger(0);
         AtomicLong totalBytes = new AtomicLong(0);
-        AtomicInteger simdMatches = new AtomicInteger(0);
+        AtomicInteger keywordMatches = new AtomicInteger(0);
         AtomicInteger totalDiscoveredLinks = new AtomicInteger(0);
 
         long t0 = System.currentTimeMillis();
 
-        // 1. Root Fetch
-        visited.add(ROOT_URL);
-        FastSpider.SpiderResponse rootResp = spider.fetchAsync(ROOT_URL).join();
-        totalCrawled.incrementAndGet();
-        totalBytes.addAndGet(rootResp.rawBody().length);
+        System.out.printf("[Root Stream] Spawning %d concurrent crawler workers on Java Virtual Threads...\n\n", SEED_PAGES.size());
 
-        System.out.printf("[Root 00] %s (HTTP %d | %,d Bytes in %d ms)\n",
-                ROOT_URL, rootResp.statusCode(), rootResp.rawBody().length, rootResp.fetchTimeMs());
+        // Level 1: Progressive Live Stream as requests arrive
+        List<CompletableFuture<Void>> level1Futures = new ArrayList<>();
+        List<CompletableFuture<Void>> level2Futures = Collections.synchronizedList(new ArrayList<>());
 
-        List<String> rootLinks = extractAllWikiLinks(rootResp.rawBody());
-        totalDiscoveredLinks.addAndGet(rootLinks.size());
-        List<String> level1Links = rootLinks.stream().distinct().filter(u -> !visited.contains(u)).limit(40).toList();
-
-        System.out.printf("  │\n  ├── Discovered %,d article links on Root. Launching Level 1 Parallel Crawl (%d articles)...\n  │\n",
-                rootLinks.size(), level1Links.size());
-
-        // 2. Fetch Level 1 concurrently
-        List<CompletableFuture<BFSNode>> level1Futures = new ArrayList<>();
-        for (int i = 0; i < level1Links.size(); i++) {
-            String url = level1Links.get(i);
+        for (int i = 0; i < SEED_PAGES.size(); i++) {
+            final int index = i + 1;
+            final String url = SEED_PAGES.get(i);
             visited.add(url);
-            boolean isLast = (i == level1Links.size() - 1);
+            final boolean isLast = (i == SEED_PAGES.size() - 1);
+            final String branch = isLast ? "└──" : "├──";
+            final String subIndent = isLast ? "   " : "│  ";
 
-            level1Futures.add(spider.fetchAsync(url).thenApply(res -> {
-                totalCrawled.incrementAndGet();
+            level1Futures.add(spider.fetchAsync(url).thenAccept(res -> {
+                int crawledCount = totalCrawled.incrementAndGet();
                 totalBytes.addAndGet(res.rawBody().length);
                 int kwHits = countKeywordHits(res.rawBody(), SEARCH_KEYWORD);
-                if (kwHits > 0) simdMatches.incrementAndGet();
-                List<String> childs = extractAllWikiLinks(res.rawBody());
+                if (kwHits > 0) keywordMatches.incrementAndGet();
+                List<String> childs = extractHrefLinks(res.rawBody());
                 totalDiscoveredLinks.addAndGet(childs.size());
-                return new BFSNode(url, res, childs, kwHits, isLast);
+
+                String tag = kwHits > 0 ? " [MATCH: " + kwHits + "x '" + SEARCH_KEYWORD + "']" : "";
+
+                synchronized (System.out) {
+                    System.out.printf("  %s [%02d] %-66s | HTTP %d | %,7d B | %3d ms | %,d links%s\n",
+                            branch, index, url, res.statusCode(),
+                            res.rawBody().length, res.fetchTimeMs(), childs.size(), tag);
+
+                    // Stream 6 live candidate links for intense hacker-style output
+                    int streamPreview = Math.min(childs.size(), 6);
+                    for (int s = 0; s < streamPreview; s++) {
+                        String lk = childs.get(s);
+                        boolean isStreamLast = (s == streamPreview - 1);
+                        String leaf = isStreamLast ? "└──" : "├──";
+                        System.out.printf("  %s  %s [LIVE LINK %02d] -> %s\n", subIndent, leaf, s + 1, lk);
+                    }
+                }
+
+                // Sub-Page parallel fetch
+                List<String> subToCrawl = childs.stream()
+                        .filter(u -> !visited.contains(u))
+                        .limit(3)
+                        .toList();
+
+                for (String subUrl : subToCrawl) {
+                    visited.add(subUrl);
+
+                    level2Futures.add(spider.fetchAsync(subUrl).thenAccept(subRes -> {
+                        int subCrawledCount = totalCrawled.incrementAndGet();
+                        totalBytes.addAndGet(subRes.rawBody().length);
+                        int kwSubHits = countKeywordHits(subRes.rawBody(), SEARCH_KEYWORD);
+                        String subTag = kwSubHits > 0 ? " [MATCH: " + kwSubHits + "x '" + SEARCH_KEYWORD + "']" : "";
+                        if (kwSubHits > 0) keywordMatches.incrementAndGet();
+
+                        List<String> subChilds = extractHrefLinks(subRes.rawBody());
+                        totalDiscoveredLinks.addAndGet(subChilds.size());
+
+                        synchronized (System.out) {
+                            System.out.printf("  %s  ├── [SUB-PAGE %03d] %-58s | HTTP %d | %,7d B | %3d ms | %,d links%s\n",
+                                    subIndent, subCrawledCount, subUrl, subRes.statusCode(),
+                                    subRes.rawBody().length, subRes.fetchTimeMs(), subChilds.size(), subTag);
+                        }
+                    }));
+                }
             }));
         }
 
-        List<BFSNode> level1Nodes = level1Futures.stream().map(CompletableFuture::join).toList();
-
-        // 3. Render Level 1 & Stream Out Level 2 Sub-Branches with Hacker-Style Link Torrent
-        List<CompletableFuture<Void>> level2Futures = new ArrayList<>();
-        for (int i = 0; i < level1Nodes.size(); i++) {
-            BFSNode node = level1Nodes.get(i);
-            String branch = node.isLast ? "└──" : "├──";
-            String subIndent = node.isLast ? "   " : "│  ";
-            String tag = node.keywordHits > 0 ? " [MATCH: " + node.keywordHits + "x SIMD]" : "";
-
-            System.out.printf("  %s [%02d] %-68s | HTTP %d | %,7d B | %3d ms | %,d links%s\n",
-                    branch, i + 1, node.url, node.response.statusCode(),
-                    node.response.rawBody().length, node.response.fetchTimeMs(), node.childLinks.size(), tag);
-
-            // Stream 5 live discovered sub-links directly to terminal for intense visual flow
-            int streamPreview = Math.min(node.childLinks.size(), 4);
-            for (int s = 0; s < streamPreview; s++) {
-                String lk = node.childLinks.get(s);
-                boolean isStreamLast = (s == streamPreview - 1);
-                String leaf = isStreamLast ? "└──" : "├──";
-                System.out.printf("  %s  %s [LIVE LINK] -> %s\n", subIndent, leaf, lk);
-            }
-
-            // Pick 3 sub-links per level 1 node for actual parallel background download
-            List<String> subLinks = node.childLinks.stream()
-                    .filter(u -> !visited.contains(u))
-                    .limit(3)
-                    .toList();
-
-            for (int k = 0; k < subLinks.size(); k++) {
-                String subUrl = subLinks.get(k);
-                visited.add(subUrl);
-
-                level2Futures.add(spider.fetchAsync(subUrl).thenAccept(subRes -> {
-                    totalCrawled.incrementAndGet();
-                    totalBytes.addAndGet(subRes.rawBody().length);
-                    int kwSubHits = countKeywordHits(subRes.rawBody(), SEARCH_KEYWORD);
-                    String subTag = kwSubHits > 0 ? " [MATCH: " + kwSubHits + "x SIMD]" : "";
-                    if (kwSubHits > 0) simdMatches.incrementAndGet();
-
-                    List<String> subChilds = extractAllWikiLinks(subRes.rawBody());
-                    totalDiscoveredLinks.addAndGet(subChilds.size());
-
-                    System.out.printf("  %s  ├── [SUB-PAGE %03d] %-60s | HTTP %d | %,7d B | %3d ms | %,d links%s\n",
-                            subIndent, totalCrawled.get(), subUrl, subRes.statusCode(),
-                            subRes.rawBody().length, subRes.fetchTimeMs(), subChilds.size(), subTag);
-                }));
-            }
-        }
-
+        CompletableFuture.allOf(level1Futures.toArray(new CompletableFuture[0])).join();
         CompletableFuture.allOf(level2Futures.toArray(new CompletableFuture[0])).join();
+
         long duration = System.currentTimeMillis() - t0;
 
         System.out.println();
@@ -132,7 +140,7 @@ public class DemoBFS {
                 totalCrawled.get(), (totalBytes.get() / (1024.0 * 1024.0)), duration,
                 (totalCrawled.get() / (duration / 1000.0)));
         System.out.printf(" Discovered %,d total hyperlinks across Wikipedia graph in real time!\n", totalDiscoveredLinks.get());
-        System.out.printf(" Found %,d pages with explicit 'SIMD' hardware vectorization references.\n", simdMatches.get());
+        System.out.printf(" Found %,d pages with explicit '%s' hardware acceleration references.\n", keywordMatches.get(), SEARCH_KEYWORD);
         System.out.println("========================================================================================================================");
     }
 
@@ -148,32 +156,16 @@ public class DemoBFS {
         return count;
     }
 
-    private static List<String> extractAllWikiLinks(byte[] htmlBytes) {
+    private static List<String> extractHrefLinks(byte[] htmlBytes) {
         String html = new String(htmlBytes, StandardCharsets.UTF_8);
         List<String> links = new ArrayList<>();
         Matcher matcher = HREF_PATTERN.matcher(html);
         while (matcher.find()) {
             String path = matcher.group(1);
-            if (!path.equals("Main_Page")) {
+            if (!path.equals("Main_Page") && !path.contains(":")) {
                 links.add("https://en.wikipedia.org/wiki/" + path);
             }
         }
         return links;
-    }
-
-    private static class BFSNode {
-        final String url;
-        final FastSpider.SpiderResponse response;
-        final List<String> childLinks;
-        final int keywordHits;
-        final boolean isLast;
-
-        BFSNode(String url, FastSpider.SpiderResponse response, List<String> childLinks, int keywordHits, boolean isLast) {
-            this.url = url;
-            this.response = response;
-            this.childLinks = childLinks;
-            this.keywordHits = keywordHits;
-            this.isLast = isLast;
-        }
     }
 }
