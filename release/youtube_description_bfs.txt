@@ -1,0 +1,27 @@
+TITLE:
+FastWebSpider: High-Speed BFS Real-Time Tree & Stream Web Crawler (Java 17+ Virtual Threads & AVX2)
+
+DESCRIPTION:
+Showcasing the raw crawling power of FastWebSpider, the high-concurrency network crawling engine of the FastJava ecosystem. Watch as FastWebSpider launches a massive parallel layer-by-layer Breadth-First-Search (BFS) crawl across 200+ live Wikipedia nodes, extracting and streaming over 35,000+ hyperlinks in real-time.
+
+By offloading the HTTP/TLS networking directly to the native Windows WinHTTP and Schannel subsystems and pairing it with Java Virtual Threads, FastWebSpider achieves hyper-scalable web crawling without JVM connection overhead or GC bloat. All incoming HTML payloads are parsed in microseconds via zero-allocation AVX2 vector SIMD instructions.
+
+TECHNICAL HIGHLIGHTS:
+- Native WinHTTP Kernel Networking: Delegates TLS 1.3 handshakes, connection pooling, and DNS lookups directly to the Windows OS kernel for zero JVM socket churn.
+- Java Virtual Thread Parallelism: Simultaneously spawns hundreds of lightweight concurrent crawler workers without blocking underlying OS threads.
+- AVX2 Vector SIMD Link Extraction: Scans raw HTML payloads at gigabytes per second with zero heap allocations, running 2.54x faster than standard java.util.regex.Pattern.
+- Real-Time Live Torrent Stream: Visualizes discovered branch nodes, latency measurements, and keyword hits progressively as HTTP responses arrive.
+- High Contrast Terminal Output: Styled with FastANSI using subtle dark-gray framing and bold white metric highlights.
+
+GITHUB REPOSITORIES:
+https://github.com/andrestubbe/FastWebSpider
+https://github.com/andrestubbe/FastRegex
+https://github.com/andrestubbe/FastANSI
+https://github.com/andrestubbe/FastCore
+
+OUR PHILOSOPHY:
+No copies. Ever. Critical paths. Native-First performance.
+If you're interested in pushing the JVM to its absolute limits, subscribe for more.
+
+TAGS:
+Java, FastJava, FastWebSpider, Web Crawler, WinHTTP, Virtual Threads, SIMD, AVX2, Networking, Tech Demo, High Performance

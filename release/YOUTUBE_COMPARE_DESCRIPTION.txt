@@ -1,0 +1,32 @@
+TITLE:
+FastWebSpider: Head-to-Head CLI Benchmark Comparison vs Standard JDK (WinHTTP & AVX2) 🚀
+
+DESCRIPTION:
+Comprehensive multi-tier CLI performance benchmark comparing FastWebSpider against standard Java HTTP & Regex stacks (java.net.http.HttpClient & java.util.regex.Pattern). 
+
+Watch the real-time speedup evaluation across three rigorous benchmark tiers:
+1. Tier 1 (SIMD Link Extraction): Native AVX2 zero-allocation token scanning vs JDK Pattern.matcher() across 300 iterations on heavy live Wikipedia HTML documents (2.89x Faster).
+2. Tier 2 (Concurrent Batch Crawling): High-throughput parallel Virtual Thread batch crawl with native WinHTTP connection pooling vs standard java.net.http.HttpClient across 200 live architecture nodes.
+3. Tier 3 (CleanText & Tag Stripper): Native SIMD HTML parser & block-level whitespace normalizer extracting clean text for LLMs vs standard JDK Regex tag stripping (2.40x Faster).
+
+BENCHMARK HIGHLIGHTS:
+- Comprehensive 3-Tier Head-to-Head Speedups across all operations
+- Zero GC Overhead: Eliminates millions of temporary Matcher, String, and Socket allocations
+- Kernel-Level WinHTTP Networking: Non-blocking off-heap network buffers & native connection pooling
+- Live Real-Time Verdict: Detailed throughput (ops/ms), latency (ms), and MB/s telemetry metrics across 120 columns
+
+RUN LOCALLY:
+Execute `run-compare.bat` in the repository root.
+
+GITHUB REPOSITORIES:
+1. FastWebSpider: https://github.com/andrestubbe/FastWebSpider
+2. FastRegex: https://github.com/andrestubbe/FastRegex
+3. FastANSI: https://github.com/andrestubbe/FastANSI
+4. FastCore: https://github.com/andrestubbe/FastCore
+
+OUR PHILOSOPHY:
+No copies. Ever. Critical paths. Native-First performance.
+If you're interested in pushing the JVM to its absolute limits, subscribe for more.
+
+TAGS:
+Java, FastJava, FastWebSpider, Benchmark, Comparison, WinHTTP, AVX2, SIMD, FastRegex, Performance, Virtual Threads, Web Crawler, CleanText

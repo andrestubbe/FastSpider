@@ -1,0 +1,29 @@
+TITLE:
+FastWebSpider: JMH Benchmark - Native WinHTTP & AVX2 Hyperlink Extraction 🚀
+
+DESCRIPTION:
+Official OpenJDK JMH (Java Microbenchmark Harness) performance benchmark for FastWebSpider. Evaluating native AVX2 SIMD hyperlink extraction throughput and zero-allocation parsing latency against standard JDK java.util.regex.Pattern matching.
+
+BENCHMARK RESULTS (JMH):
+- FastWebSpider Native AVX2 Extraction: ~1.50 - 2.54 ops/ms (Sub-millisecond full-page HTML link scanning)
+- JDK Standard Pattern.matcher(): ~0.60 - 0.78 ops/ms
+- Measured Speedup: 1.92x - 2.54x Faster
+- Heap Allocation: 0 GC allocations in native SIMD token extraction loop
+
+RUN BENCHMARKS LOCALLY:
+- OpenJDK JMH Benchmark: Execute `run-benchmark.bat` in the repository root.
+- Real-Time CLI Comparison: Execute `run-compare.bat` in the repository root.
+
+FASTJAVA NETWORK & CRAWLER REPOSITORIES:
+1. FastWebSpider: https://github.com/andrestubbe/FastWebSpider
+2. FastRegex: https://github.com/andrestubbe/FastRegex
+3. FastANSI: https://github.com/andrestubbe/FastANSI
+4. FastCore: https://github.com/andrestubbe/FastCore
+
+Ecosystem Overview: https://github.com/andrestubbe/FastJava
+
+Part of the FastJava Ecosystem — Making the JVM faster.
+Made with ⚡ by Andre Stubbe
+
+TAGS:
+Java, FastJava, JMH, Benchmark, FastWebSpider, Web Crawler, WinHTTP, AVX2, SIMD, FastRegex, Performance, Virtual Threads

@@ -1,0 +1,27 @@
+TITLE:
+FastWebSpider: DFS Deep-Dive Recursive Pathfinder Web Crawler (AVX2 & Native WinHTTP)
+
+DESCRIPTION:
+Witness FastWebSpider recursively descend deep into the global Wikipedia hyperlink graph. In this Depth-First-Search (DFS) Pathfinder demo, the crawler navigates 25 consecutive recursive branch hops in milliseconds, streaming candidate links and locating deep target concepts across thousands of extracted hyperlinks.
+
+By combining native Windows WinHTTP socket descriptors with AVX2-accelerated zero-copy regex parsing, FastWebSpider eliminates JVM memory allocation bottlenecks, enabling blistering path traversal speeds directly from the command line.
+
+TECHNICAL HIGHLIGHTS:
+- 25-Hop Deep Recursive Descent: Auto-traverses deeply nested web structures and domain graphs with microsecond branch-switching.
+- Native WinHTTP Off-Heap Transport: Eliminates JVM HTTP client overhead and socket descriptors for lightning-fast consecutive requests.
+- SIMD-Accelerated Zero-Allocation Scanning: Analyzes and filters hundreds of candidate URLs per page in less than 1 ms without GC cycles.
+- Live Candidate Stream: Displays candidates in real-time beneath each node with continuous ANSI tree line alignment.
+- Minimalist Terminal Aesthetic: High-contrast dark-gray framing and bold white highlights via FastANSI.
+
+GITHUB REPOSITORIES:
+https://github.com/andrestubbe/FastWebSpider
+https://github.com/andrestubbe/FastRegex
+https://github.com/andrestubbe/FastANSI
+https://github.com/andrestubbe/FastCore
+
+PHILOSOPHY:
+No copies. Ever. Critical paths. Native-First performance.
+If you're interested in pushing the JVM to its absolute limits, subscribe for more.
+
+TAGS:
+Java, FastJava, FastWebSpider, DFS, Pathfinder, Web Crawler, WinHTTP, AVX2, Networking, Tech Demo, High Performance
