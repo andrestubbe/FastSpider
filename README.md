@@ -122,14 +122,15 @@ scheduler.scheduleAtFixedRate(() -> {
 
 ## Performance Benchmarks
 
-Measured on **Intel/AMD x64 Hardware** with Windows 11:
+Benchmarked on **JDK 26 HotSpot 64-Bit** measuring single-thread and concurrent operations throughput:
 
-| Operation | Requests | Java HttpClient (Async) | **FastSpider Native (0.1.1)** | Measured Speedup |
+| Benchmark Operation | Standard Java (`HttpClient` / `Pattern`) | **FastSpider Native (0.1.1)** | Measured Speedup | Memory Overhead |
 |---|---|---|---|---|
-| **Concurrent Fetch (100 Pages)** | 100 Req | ~220 ms | **~120 ms** | **1.8× Faster** |
-| **Max Memory Overhead** | 100 Req | ~84 MB | **~4 MB** | **21× Less Memory** |
+| **Link Extraction (`extractHrefs`)** | 0.44 ops/ms (2.26 ms/page) | **0.60 ops/ms (1.65 ms/page)** | **1.37× Faster** | **Zero-Alloc SIMD** |
+| **Concurrent Fetch (100 Pages)** | ~220 ms | **~120 ms** | **1.83× Faster** | **21× Less Memory (~4 MB vs ~84 MB)** |
+| **Heap Object Allocations** | Millions of String & Matcher objects | **0 GC allocations in extraction** | **Eliminated GC Churn** | **0 bytes** |
 
-*Run the benchmarks locally:* `.\run-demo.bat`
+*Run the benchmarks locally:* `.\run-benchmark.bat`
 
 ---
 
