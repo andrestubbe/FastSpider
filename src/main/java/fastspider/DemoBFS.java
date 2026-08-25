@@ -105,7 +105,7 @@ public class DemoBFS {
                         boolean isStreamLast = (s == streamPreview - 1);
                         String leaf = isStreamLast ? "└──" : "├──";
                         System.out.printf("  %s  %s %s -> %s\n",
-                                darkGray(subIndent), darkGray(leaf), boldWhite(String.format("[LINK %02d]", s + 1)), darkGray(lk));
+                                darkGray(subIndent), darkGray(leaf), darkGray(String.format("[LINK %02d]", s + 1)), darkGray(lk));
                     }
                 }
 

@@ -75,7 +75,7 @@ public class DemoDFS {
                 String shortLk = truncate(lk, 60);
                 System.out.printf("%s    %s %s %s%s\n",
                         darkGray(indent.toString()), darkGray(isLast ? "└──" : "├──"),
-                        boldWhite(String.format("[LINK %02d]", p + 1)), darkGray(shortLk), tag);
+                        darkGray(String.format("[LINK %02d]", p + 1)), darkGray(shortLk), tag);
             }
 
             if (isTargetPage && depth >= 15) {
