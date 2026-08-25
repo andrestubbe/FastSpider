@@ -18,12 +18,13 @@ import java.util.concurrent.CompletableFuture;
 public class PipelineDemo {
 
     public static void main(String[] args) throws Exception {
-        System.out.println("\u001B[35m====================================================================\u001B[0m");
-        System.out.println("\u001B[36;1m⚡ FastJava Pipeline — Native Crawler (WinHTTP) + Native Parser (SIMD) ⚡\u001B[0m");
-        System.out.println("\u001B[35m====================================================================\u001B[0m");
+        System.out.println("====================================================================");
+        System.out.println(" FastJava Pipeline — Native Crawler (WinHTTP) + Native Parser (SIMD)");
+        System.out.println("====================================================================");
+        System.out.println();
 
         // 1. Start a local mock HTTP server serving a rich structured page
-        System.out.println("\u001B[33mStarting local mock HTTP server...\u001B[0m");
+        System.out.println("Starting local mock HTTP server...");
         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         
         server.createContext("/target", new HttpHandler() {
@@ -42,7 +43,7 @@ public class PipelineDemo {
                         "  </script>\n" +
                         "</head>\n" +
                         "<body>\n" +
-                        "  <h1>⚡ High-Performance JNI Integration</h1>\n" +
+                        "  <h1>High-Performance JNI Integration</h1>\n" +
                         "  <p>This page was fetched asynchronously via C++ WinHTTP sockets.</p>\n" +
                         "  <p>Now, it will be parsed natively via C++ AVX2 vector registers!</p>\n" +
                         "  \n" +
@@ -66,26 +67,26 @@ public class PipelineDemo {
         server.start();
         int port = server.getAddress().getPort();
         String targetUrl = "http://127.0.0.1:" + port + "/target";
-        System.out.println("\u001B[32m✔ Mock server running on " + targetUrl + "\u001B[0m\n");
+        System.out.println("OK: Mock server running on " + targetUrl + "\n");
 
         // 2. Open both native engines
-        System.out.println("\u001B[33mInitializing Native WinHTTP Crawler and SIMD Parser...\u001B[0m");
+        System.out.println("Initializing Native WinHTTP Crawler and SIMD Parser...");
         FastSpider spider = FastSpider.open();
         FastScrape scraper = FastScrape.open();
-        System.out.println("\u001B[32m✔ Both libraries successfully JNI loaded.\u001B[0m\n");
+        System.out.println("OK: Both native engines loaded via FastCore.\n");
 
         // 3. Execution Pipeline
-        System.out.println("\u001B[33m[Step 1] Fetching page asynchronously with FastSpider...\u001B[0m");
+        System.out.println("[Step 1] Fetching page asynchronously with FastSpider...");
         long startFetch = System.nanoTime();
         CompletableFuture<FastSpider.SpiderResponse> future = spider.fetchAsync(targetUrl);
         FastSpider.SpiderResponse response = future.join();
         long fetchDurationMs = (System.nanoTime() - startFetch) / 1_000_000;
 
         if (response.isSuccess()) {
-            System.out.println("\u001B[32m✔ Page successfully downloaded via WinHTTP in " + fetchDurationMs + " ms! (" + response.rawBody().length + " bytes)\u001B[0m\n");
+            System.out.println("OK: Downloaded " + response.rawBody().length + " bytes in " + fetchDurationMs + " ms.\n");
 
             // Zero-Copy Passing directly to FastScrape JNI
-            System.out.println("\u001B[33m[Step 2] Passing raw bytes to FastScrape for instant SIMD parsing...\u001B[0m");
+            System.out.println("[Step 2] Passing raw bytes to FastScrape for instant SIMD parsing...");
             
             // Extract clean visible text
             long textStart = System.nanoTime();
@@ -103,29 +104,29 @@ public class PipelineDemo {
             double jsonTimeUs = (System.nanoTime() - jsonStart) / 1000.0;
 
             // Render Output Matrix
-            System.out.println("\u001B[32m====================================================================\u001B[0m");
-            System.out.println("\u001B[36;1m📊 Pipeline Metrics & Extracted Results 📊\u001B[0m");
-            System.out.println("\u001B[32m====================================================================\u001B[0m");
+            System.out.println("====================================================================");
+            System.out.println(" Pipeline Metrics & Extracted Results");
+            System.out.println("====================================================================");
             
-            System.out.println("\n\u001B[33m[Readable Plain Text] extracted in " + textTimeUs + " microseconds:\u001B[0m");
+            System.out.printf("\n[Readable Plain Text] extracted in %.2f µs:\n", textTimeUs);
             System.out.println(readableText);
             
-            System.out.println("\n\u001B[33m[Anchor Links] extracted in " + linksTimeUs + " microseconds:\u001B[0m");
+            System.out.printf("\n[Anchor Links] (%,d links) extracted in %.2f µs:\n", links.size(), linksTimeUs);
             for (String link : links) {
-                System.out.println("  🔗 " + link);
+                System.out.println("  -> " + link);
             }
             
-            System.out.println("\n\u001B[33m[JSON-LD Schema Metadata] extracted in " + jsonTimeUs + " microseconds:\u001B[0m");
+            System.out.printf("\n[JSON-LD Schema Metadata] extracted in %.2f µs:\n", jsonTimeUs);
             System.out.println(jsonLD.trim());
         } else {
-            System.err.println("❌ Fetch failed: Status " + response.statusCode());
+            System.err.println("ERR: Fetch failed with status " + response.statusCode());
         }
 
         // 4. Shutdown server
-        System.out.println("\n\u001B[33mShutting down mock HTTP server...\u001B[0m");
+        System.out.println("\nShutting down mock HTTP server...");
         server.stop(0);
-        System.out.println("\u001B[35m====================================================================\u001B[0m");
-        System.out.println("\u001B[36;1m✔ Pipeline Execution Complete!\u001B[0m");
-        System.out.println("\u001B[35m====================================================================\u001B[0m");
+        System.out.println("====================================================================");
+        System.out.println(" Pipeline Execution Complete!");
+        System.out.println("====================================================================");
     }
 }
