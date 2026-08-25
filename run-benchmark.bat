@@ -1,18 +1,30 @@
 @echo off
 setlocal
+chcp 65001 > nul
 cd /d "%~dp0"
 set "MAVEN_OPTS=--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -Dorg.slf4j.simpleLogger.defaultLogLevel=warn"
+
 echo ===================================================
-echo  Building FastSpider ^& Running Benchmark Suite
+echo  Building FastSpider & JMH Benchmarks Uber-Jar
 echo ===================================================
 
-call "C:\Users\andre\tools\apache-maven-3.9.9\bin\mvn.cmd" -q -Dorg.slf4j.simpleLogger.defaultLogLevel=warn test-compile
+call "C:\Users\andre\tools\apache-maven-3.9.9\bin\mvn.cmd" -q clean install -DskipTests 2>nul
 if %ERRORLEVEL% NEQ 0 (
-    echo [ERROR] Build failed!
+    echo [ERROR] FastSpider install failed!
     pause
     exit /b %ERRORLEVEL%
 )
 
-echo [FastSpider] Running Link Extraction & Network Benchmark...
-call "C:\Users\andre\tools\apache-maven-3.9.9\bin\mvn.cmd" -q exec:java "-Dexec.mainClass=fastspider.Benchmark" "-Dexec.args=" "-Dexec.vmArgs=--enable-native-access=ALL-UNNAMED"
+cd examples\Benchmark
+call "C:\Users\andre\tools\apache-maven-3.9.9\bin\mvn.cmd" -q clean package 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo [ERROR] Benchmark packaging failed!
+    pause
+    exit /b %ERRORLEVEL%
+)
+
+echo ===================================================
+echo  Running JMH Benchmarks (Throughput: ops/ms)
+echo ===================================================
+java --enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -jar target\benchmarks.jar -f 1 -wi 2 -i 3 -tu ms -bm thrpt 2>nul
 pause

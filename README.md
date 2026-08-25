@@ -130,7 +130,8 @@ Benchmarked on **JDK 26 HotSpot 64-Bit** measuring single-thread and concurrent 
 | **Concurrent Fetch (100 Pages)** | ~220 ms | **~120 ms** | **1.83× Faster** | **21× Less Memory (~4 MB vs ~84 MB)** |
 | **Heap Object Allocations** | Millions of String & Matcher objects | **0 GC allocations in extraction** | **Eliminated GC Churn** | **0 bytes** |
 
-*Run the benchmarks locally:* `.\run-benchmark.bat`
+*Run the JMH benchmark locally:* `.\run-benchmark.bat`  
+*Run the quick CLI comparison:* `.\run-compare.bat`
 
 ---
 
