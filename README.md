@@ -150,8 +150,8 @@ Benchmarked on **JDK 26 HotSpot 64-Bit** measuring single-thread and concurrent 
 
 | Case | Java Example | Launcher | Description |
 |---|---|---|---|
-| **Hero Demo** | [Demo.java](src/main/java/fastspider/Demo.java) | `run-demo.bat` | Live Wikipedia sequential crawl, parallel Virtual Thread batch, and AVX2 link extraction. |
-| **Joint Pipeline Demo** | [PipelineDemo.java](examples/PipelineDemo/src/main/java/fastpipeline/PipelineDemo.java) | `run-pipeline.bat` | Orchestrates FastSpider and FastScrape in unison. |
+| **BFS Tree Stream** | [DemoBFS.java](src/main/java/fastspider/DemoBFS.java) | `run-demo-bfs.bat` | Massive concurrent layer-by-layer crawl across 200+ live pages with real-time AVX2 link streaming. |
+| **DFS Deep Descent** | [DemoDFS.java](src/main/java/fastspider/DemoDFS.java) | `run-demo-dfs.bat` | 25-hop recursive pathfinder auto-navigating deep Wikipedia concepts with live hyperlink scanning. |
 
 ---
 
