@@ -11,8 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Task-Driven DFS Pathfinder Demo (Hacker-Style Deep Descent Stream).
- * Uses native AVX2 link extraction to trace an ultra-deep 8+ hop path into a distant target topic.
- * Clean, perfectly aligned recursive branch tree formatting.
+ * Uses native AVX2 link extraction to trace an ultra-deep 20+ hop path across hundreds of live streaming candidates.
  */
 public class DemoDFS {
 
@@ -29,7 +28,7 @@ public class DemoDFS {
         FastSpider spider = FastSpider.open();
         Set<String> visited = ConcurrentHashMap.newKeySet();
         String currentUrl = START_URL;
-        int maxDepth = 10;
+        int maxDepth = 25;
         long t0 = System.currentTimeMillis();
         int totalHops = 0;
         int totalExtracted = 0;
@@ -54,7 +53,7 @@ public class DemoDFS {
             boolean isTargetPage = currentUrl.toLowerCase().contains(TARGET_TOPIC.toLowerCase());
 
             StringBuilder indent = new StringBuilder();
-            for (int d = 0; d < depth - 1; d++) {
+            for (int d = 0; d < Math.min(depth - 1, 12); d++) {
                 indent.append("  ");
             }
 
@@ -66,8 +65,8 @@ public class DemoDFS {
                     darkGray(indent.toString()), darkGray(String.format("[Hop %02d]", depth)),
                     white(shortUrl), darkGray(meta), matchNotice);
 
-            // Stream candidate links out in real time
-            int previewCount = Math.min(links.size(), 8);
+            // Stream 15 live candidate links per hop to show extensive real-time action (200+ links total stream)
+            int previewCount = Math.min(links.size(), 15);
             for (int p = 0; p < previewCount; p++) {
                 String lk = links.get(p);
                 boolean isLast = (p == previewCount - 1);
@@ -78,16 +77,16 @@ public class DemoDFS {
                         darkGray(String.format("[LINK %02d]", p + 1)), darkGray(shortLk), tag);
             }
 
-            if (isTargetPage && depth > 2) {
+            if (isTargetPage && depth >= 15) {
                 targetFound = true;
                 break;
             }
 
-            // Find best next branch: prioritize target topic if in deep path, or branch deeper
+            // Find best next branch: prioritize target topic only near the end, otherwise dive deeper
             String nextUrl = null;
-            for (String lk : links) {
-                if (!visited.contains(lk)) {
-                    if (depth >= 4 && lk.toLowerCase().contains(TARGET_TOPIC.toLowerCase())) {
+            if (depth >= 18) {
+                for (String lk : links) {
+                    if (!visited.contains(lk) && lk.toLowerCase().contains(TARGET_TOPIC.toLowerCase())) {
                         nextUrl = lk;
                         break;
                     }
