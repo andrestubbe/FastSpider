@@ -11,17 +11,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * High-Speed Visual BFS Tree & Stream Crawler Demo.
- * Uses FastANSI subtle Gray & White highlighting for clean, high-contrast, professional visuals.
+ * Displays the initial seed queue followed by live parallel crawler torrents.
  */
 public class DemoBFS {
 
     private static final String SEARCH_KEYWORD = "vector";
-    private static final Pattern HREF_PATTERN = Pattern.compile("href=\"/wiki/([^\"#:]+)\"");
 
     private static final List<String> SEED_PAGES = List.of(
         "https://en.wikipedia.org/wiki/SIMD",
@@ -49,9 +46,18 @@ public class DemoBFS {
     public static void main(String[] args) throws Exception {
         System.out.println(gray("========================================================================================================================"));
         System.out.println(" " + white("FastSpider") + gray(" — Massive BFS Real-Time Tree & Stream Crawler (WinHTTP Native + Virtual Threads)"));
-        System.out.println(gray(" MISSION: Live high-throughput network scan discovering 5,000+ branch links and hardware vector references"));
+        System.out.println(gray(" MISSION: Live high-throughput network scan discovering 10,000+ branch links and hardware vector references"));
         System.out.println(gray("========================================================================================================================"));
         System.out.println();
+
+        System.out.println(gray("[Initial Crawl Queue] Loaded ") + white(String.valueOf(SEED_PAGES.size())) + gray(" root architecture & language nodes:"));
+        for (int i = 0; i < SEED_PAGES.size(); i++) {
+            boolean isLast = (i == SEED_PAGES.size() - 1);
+            String branch = isLast ? "└──" : "├──";
+            System.out.printf("  %s %s %s\n", gray(branch), gray(String.format("[%02d]", i + 1)), white(SEED_PAGES.get(i)));
+        }
+        System.out.println();
+        System.out.println(gray("[Root Stream] Spawning ") + white(String.valueOf(SEED_PAGES.size())) + gray(" concurrent crawler workers on Java Virtual Threads...\n"));
 
         FastSpider spider = FastSpider.open();
         Set<String> visited = ConcurrentHashMap.newKeySet();
@@ -61,8 +67,6 @@ public class DemoBFS {
         AtomicInteger totalDiscoveredLinks = new AtomicInteger(0);
 
         long t0 = System.currentTimeMillis();
-
-        System.out.println(gray("[Root Stream] Spawning ") + white(String.valueOf(SEED_PAGES.size())) + gray(" concurrent crawler workers on Java Virtual Threads...\n"));
 
         // Level 1: Progressive Live Stream
         List<CompletableFuture<Void>> level1Futures = new ArrayList<>();
@@ -81,7 +85,10 @@ public class DemoBFS {
                 totalBytes.addAndGet(res.rawBody().length);
                 int kwHits = countKeywordHits(res.rawBody(), SEARCH_KEYWORD);
                 if (kwHits > 0) keywordMatches.incrementAndGet();
-                List<String> childs = extractHrefLinks(res.rawBody());
+                
+                // Native AVX2 Link Extraction
+                List<String> rawHrefs = spider.extractHrefs(res.rawBody());
+                List<String> childs = filterWikiArticleLinks(rawHrefs);
                 totalDiscoveredLinks.addAndGet(childs.size());
 
                 String tag = kwHits > 0 ? " " + white("[MATCH: " + kwHits + "x '" + SEARCH_KEYWORD + "']") : "";
@@ -92,8 +99,8 @@ public class DemoBFS {
                             gray("|"), res.statusCode(), gray("|"), res.rawBody().length,
                             gray("|"), res.fetchTimeMs(), gray("|"), childs.size(), tag);
 
-                    // Stream 6 live candidate links for intense hacker-style output
-                    int streamPreview = Math.min(childs.size(), 6);
+                    // Stream 8 distinct live candidate links for intense visual flow
+                    int streamPreview = Math.min(childs.size(), 8);
                     for (int s = 0; s < streamPreview; s++) {
                         String lk = childs.get(s);
                         boolean isStreamLast = (s == streamPreview - 1);
@@ -103,7 +110,7 @@ public class DemoBFS {
                     }
                 }
 
-                // Sub-Page parallel fetch
+                // Sub-Page parallel fetch (pick 3 distinct sub-links to crawl)
                 List<String> subToCrawl = childs.stream()
                         .filter(u -> !visited.contains(u))
                         .limit(3)
@@ -119,7 +126,8 @@ public class DemoBFS {
                         String subTag = kwSubHits > 0 ? " " + white("[MATCH: " + kwSubHits + "x '" + SEARCH_KEYWORD + "']") : "";
                         if (kwSubHits > 0) keywordMatches.incrementAndGet();
 
-                        List<String> subChilds = extractHrefLinks(subRes.rawBody());
+                        List<String> subRaw = spider.extractHrefs(subRes.rawBody());
+                        List<String> subChilds = filterWikiArticleLinks(subRaw);
                         totalDiscoveredLinks.addAndGet(subChilds.size());
 
                         synchronized (System.out) {
@@ -168,16 +176,22 @@ public class DemoBFS {
         return count;
     }
 
-    private static List<String> extractHrefLinks(byte[] htmlBytes) {
-        String html = new String(htmlBytes, StandardCharsets.UTF_8);
+    private static List<String> filterWikiArticleLinks(List<String> rawHrefs) {
         List<String> links = new ArrayList<>();
-        Matcher matcher = HREF_PATTERN.matcher(html);
-        while (matcher.find()) {
-            String path = matcher.group(1);
-            if (!path.equals("Main_Page") && !path.contains(":")) {
-                links.add("https://en.wikipedia.org/wiki/" + path);
+        for (String href : rawHrefs) {
+            if (href == null || href.isEmpty()) continue;
+            if (href.startsWith("/wiki/")) {
+                String sub = href.substring(6);
+                if (!sub.contains(":") && !sub.contains("#") && !sub.contains("?") && !sub.equals("Main_Page")) {
+                    links.add("https://en.wikipedia.org" + href);
+                }
+            } else if (href.startsWith("https://en.wikipedia.org/wiki/")) {
+                String sub = href.substring(30);
+                if (!sub.contains(":") && !sub.contains("#") && !sub.contains("?") && !sub.equals("Main_Page")) {
+                    links.add(href);
+                }
             }
         }
-        return links;
+        return links.stream().distinct().toList();
     }
 }
