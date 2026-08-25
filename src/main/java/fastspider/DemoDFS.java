@@ -11,8 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Task-Driven DFS Pathfinder Demo (Hacker-Style Deep Descent Stream).
- * Uses native AVX2 link extraction to trace an ultra-deep 20+ hop path across hundreds of live streaming candidates.
- * Clean, perfectly aligned recursive branch tree formatting with bright-white index badges.
+ * Uses native AVX2 link extraction to trace an ultra-deep 25-hop path with perfectly continuous tree lines.
  */
 public class DemoDFS {
 
@@ -53,28 +52,23 @@ public class DemoDFS {
 
             boolean isTargetPage = currentUrl.toLowerCase().contains(TARGET_TOPIC.toLowerCase());
 
-            StringBuilder indent = new StringBuilder();
-            for (int d = 0; d < Math.min(depth - 1, 12); d++) {
-                indent.append("  ");
-            }
-
             String matchNotice = isTargetPage ? " " + boldWhite("*** TARGET REACHED! ***") : "";
             String meta = String.format(" -> %,d links", links.size());
             String shortUrl = truncate(currentUrl, 56);
 
-            System.out.printf("%s└── %s %-56s%s%s\n",
-                    darkGray(indent.toString()), boldWhite(String.format("[Hop %02d]", depth)),
+            System.out.printf("  ├── %s %-56s%s%s\n",
+                    boldWhite(String.format("[Hop %02d]", depth)),
                     white(shortUrl), darkGray(meta), matchNotice);
 
-            // Stream 15 live candidate links per hop to show extensive real-time action (200+ links total stream)
+            // Stream 15 live candidate links per hop to show extensive real-time action
             int previewCount = Math.min(links.size(), 15);
             for (int p = 0; p < previewCount; p++) {
                 String lk = links.get(p);
                 boolean isLast = (p == previewCount - 1);
                 String tag = lk.toLowerCase().contains(TARGET_TOPIC.toLowerCase()) ? " " + boldWhite("[★ TARGET CANDIDATE]") : "";
-                String shortLk = truncate(lk, 60);
-                System.out.printf("%s    %s %s %s%s\n",
-                        darkGray(indent.toString()), darkGray(isLast ? "└──" : "├──"),
+                String shortLk = truncate(lk, 65);
+                System.out.printf("  │    %s %s %s%s\n",
+                        darkGray(isLast ? "└──" : "├──"),
                         darkGray(String.format("[LINK %02d]", p + 1)), darkGray(shortLk), tag);
             }
 
@@ -103,7 +97,7 @@ public class DemoDFS {
             }
 
             if (nextUrl == null) {
-                System.out.printf("%s    %s\n", darkGray(indent.toString()), darkGray("(Terminal branch reached)"));
+                System.out.printf("  │    %s\n", darkGray("(Terminal branch reached)"));
                 break;
             }
 
