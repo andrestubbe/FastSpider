@@ -6,27 +6,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Hero Demo — live terminal crawler using real Wikipedia pages.
+ * Hero Demo — clean terminal crawler using real Wikipedia pages.
  * Showcases native WinHTTP fetching, Virtual Thread concurrency,
- * and AVX2 link extraction with animated ANSI output.
+ * and AVX2 link extraction with clean, neutral terminal output.
  */
 public class Demo {
 
     private Demo() {}
 
-    // ── ANSI helpers ────────────────────────────────────────────────────────
-    private static final String R  = "\033[0m";
-    private static final String B  = "\033[1m";
-    private static final String CY = "\033[36m";
-    private static final String GR = "\033[32m";
-    private static final String YL = "\033[33m";
-    private static final String MG = "\033[35m";
-    private static final String RD = "\033[31m";
-    private static final String DM = "\033[90m";   // dim grey
-    private static final String ER = "\033[K";     // erase to end of line
-    private static final String[] SPIN = {"⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏"};
-
-    // ── Target URLs ─────────────────────────────────────────────────────────
     private static final List<String> URLS = List.of(
         "https://en.wikipedia.org/wiki/Java_(programming_language)",
         "https://en.wikipedia.org/wiki/C%2B%2B",
@@ -36,12 +23,15 @@ public class Demo {
     );
 
     public static void main(String[] args) throws Exception {
-        banner();
+        System.out.println("------------------------------------------------------------------");
+        System.out.println(" FastSpider — Native WinHTTP + Virtual Thread Crawler Benchmark");
+        System.out.println("------------------------------------------------------------------");
+        System.out.println();
 
         FastSpider spider = FastSpider.open();
 
-        // ── Phase 1: live sequential ticker ─────────────────────────────────
-        header("Phase 1", "Sequential crawl — " + URLS.size() + " Wikipedia pages");
+        // ── Phase 1: Sequential Fetch ───────────────────────────────────────
+        System.out.println("[Phase 1] Sequential Crawl (" + URLS.size() + " pages):");
         System.out.println();
 
         List<FastSpider.SpiderResponse> sequential = new ArrayList<>();
@@ -51,26 +41,21 @@ public class Demo {
             String url  = URLS.get(i);
             String label = shortLabel(url);
 
-            // pending line
-            System.out.printf("\r  " + YL + "[%d/%d]" + R + " Fetching %-34s ..." + ER,
-                    i + 1, URLS.size(), label);
-            System.out.flush();
-
             long t0 = System.nanoTime();
             FastSpider.SpiderResponse resp = spider.fetchAsync(url).join();
             long ms = (System.nanoTime() - t0) / 1_000_000;
             seqTotal += ms;
             sequential.add(resp);
 
-            String tick = resp.isSuccess() ? GR + "✔" + R : RD + "✘" + R;
-            System.out.printf(
-                "\r  " + YL + "[%d/%d]" + R + " %s %-34s  " + GR + "%3d" + R + "  " + CY + "%,5d ms" + R + "  " + DM + "%,6d B" + R + ER + "\n",
-                i + 1, URLS.size(), tick, label, resp.statusCode(), ms, resp.rawBody().length);
+            String status = resp.isSuccess() ? "OK" : "ERR";
+            System.out.printf("  [%d/%d] [%s] %-30s | HTTP %3d | %,5d ms | %,7d Bytes\n",
+                    i + 1, URLS.size(), status, label, resp.statusCode(), ms, resp.rawBody().length);
         }
+        System.out.printf("  Total sequential time: %,d ms\n", seqTotal);
         System.out.println();
 
-        // ── Phase 2: concurrent batch with spinner ───────────────────────────
-        header("Phase 2", "Concurrent batch — same pages via Virtual Threads");
+        // ── Phase 2: Concurrent Virtual Thread Batch ─────────────────────────
+        System.out.println("[Phase 2] Concurrent Batch (Virtual Threads):");
         System.out.println();
 
         AtomicInteger doneCount = new AtomicInteger(0);
@@ -81,64 +66,42 @@ public class Demo {
             futures.add(spider.fetchAsync(url).whenComplete((r, t) -> doneCount.incrementAndGet()));
         }
 
-        int s = 0;
-        while (doneCount.get() < URLS.size()) {
-            double elapsed = (System.currentTimeMillis() - batchStart) / 1000.0;
-            System.out.printf("\r  " + CY + SPIN[s % SPIN.length] + R
-                    + " Crawling...  " + GR + "%d" + R + "/" + URLS.size() + " pages done  " + DM + "%.1fs" + R + ER,
-                    doneCount.get(), elapsed);
-            System.out.flush();
-            Thread.sleep(80);
-            s++;
+        for (var f : futures) {
+            f.join();
         }
+
         long batchMs = System.currentTimeMillis() - batchStart;
         double speedup = (double) seqTotal / Math.max(1, batchMs);
-        System.out.printf("\r  " + GR + "✔ Batch complete!" + R
-                + "  All %d pages in " + B + GR + "%d ms" + R
-                + "  " + DM + "(%.1fx faster than sequential)" + R + ER + "\n",
+        System.out.printf("  Completed all %d pages in %,d ms (%.2fx speedup vs sequential)\n",
                 URLS.size(), batchMs, speedup);
         System.out.println();
 
-        // ── Phase 3: link extraction ─────────────────────────────────────────
-        header("Phase 3", "AVX2 link extraction — \"Java (programming language)\"");
+        // ── Phase 3: AVX2 Link Extraction ────────────────────────────────────
+        System.out.println("[Phase 3] AVX2 Link Extraction (\"Java (programming language)\"):");
         System.out.println();
 
         FastSpider.SpiderResponse javaPage = sequential.get(0);
+        long parseT0 = System.nanoTime();
         List<String> hrefs = spider.extractHrefs(javaPage.rawBody());
-        int shown = Math.min(hrefs.size(), 10);
+        long parseUs = (System.nanoTime() - parseT0) / 1_000;
+
+        int shown = Math.min(hrefs.size(), 8);
         for (int i = 0; i < shown; i++) {
-            System.out.println("  " + CY + "→" + R + " " + hrefs.get(i));
+            System.out.println("  -> " + hrefs.get(i));
         }
         if (hrefs.size() > shown) {
-            System.out.println("  " + DM + "  ... and " + (hrefs.size() - shown) + " more links" + R);
+            System.out.println("     ... and " + (hrefs.size() - shown) + " more links extracted in " + parseUs + " µs");
         }
         System.out.println();
-
-        // ── Footer ───────────────────────────────────────────────────────────
-        footer("FastSpider crawled " + URLS.size() + " real Wikipedia pages via native WinHTTP + Virtual Threads.");
+        System.out.println("------------------------------------------------------------------");
+        System.out.printf(" Summary: Crawled %d pages, extracted %,d links in %,d ms total.\n",
+                URLS.size(), hrefs.size(), (seqTotal + batchMs));
+        System.out.println("------------------------------------------------------------------");
     }
 
-    // ── Helpers ─────────────────────────────────────────────────────────────
     private static String shortLabel(String url) {
         return url.substring(url.lastIndexOf('/') + 1)
                   .replace("%2B", "+")
                   .replace("_", " ");
-    }
-
-    private static void banner() {
-        System.out.println(MG + "═══════════════════════════════════════════════════════════════");
-        System.out.println(B + CY + "  ⚡ FastSpider  —  Native WinHTTP + Virtual Thread Crawler" + R);
-        System.out.println(MG + "═══════════════════════════════════════════════════════════════" + R);
-        System.out.println();
-    }
-
-    private static void header(String phase, String msg) {
-        System.out.println(YL + B + "[" + phase + "]" + R + " " + msg);
-    }
-
-    private static void footer(String msg) {
-        System.out.println(MG + "═══════════════════════════════════════════════════════════════");
-        System.out.println(B + GR + "  ✔ " + msg + R);
-        System.out.println(MG + "═══════════════════════════════════════════════════════════════" + R);
     }
 }
