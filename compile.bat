@@ -3,11 +3,11 @@
 :: Auto-detects Visual Studio and JAVA_HOME
 
 echo ========================================
-echo FastSpider Native Library Builder
+echo FastWebSpider Native Library Builder
 echo ========================================
 
 :: Configuration
-set LIB_NAME=fastspider
+set LIB_NAME=fastwebspider
 
 :: Try to find VS using vswhere.exe (most reliable)
 set "VSWHERE=%ProgramFiles(x86)%\Microsoft Visual Studio\Installer\vswhere.exe"
@@ -42,7 +42,9 @@ echo Found Visual Studio at: %VS_PATH%
 
 :: Try to detect JAVA_HOME if not set
 if not defined JAVA_HOME (
-    if exist "C:\Program Files\Java\jdk-25" (
+    if exist "C:\Program Files\Java\jdk-26.0.2.1" (
+        set "JAVA_HOME=C:\Program Files\Java\jdk-26.0.2.1"
+    ) else if exist "C:\Program Files\Java\jdk-25" (
         set "JAVA_HOME=C:\Program Files\Java\jdk-25"
     ) else if exist "C:\Program Files\Eclipse Adoptium\jdk-17-hotspot" (
         set "JAVA_HOME=C:\Program Files\Eclipse Adoptium\jdk-17-hotspot"

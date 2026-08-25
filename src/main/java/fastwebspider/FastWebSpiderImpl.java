@@ -1,4 +1,4 @@
-package fastspider;
+package fastwebspider;
 
 import fastcore.FastCore;
 import java.util.ArrayList;
@@ -9,13 +9,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Implementation of FastSpider interface using native WinHTTP and AVX2 logic.
+ * Implementation of FastWebSpider interface using native WinHTTP and AVX2 logic.
  */
-class FastSpiderImpl implements FastSpider {
+class FastWebSpiderImpl implements FastWebSpider {
 
     static {
         // Load the JNI library using FastCore Unified Loader
-        FastCore.loadLibrary("fastspider");
+        FastCore.loadLibrary("FastWebSpider");
     }
 
     // Virtual Thread Executor for async WinHTTP tasks

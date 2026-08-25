@@ -1,4 +1,4 @@
-package fastspider;
+package fastwebspider;
 
 import fastansi.FastANSI;
 
@@ -45,7 +45,7 @@ public class DemoBFS {
 
     public static void main(String[] args) throws Exception {
         System.out.println(darkGray("========================================================================================================================"));
-        System.out.println(" " + boldWhite("FastSpider") + darkGray(" — Massive BFS Real-Time Tree & Stream Crawler (WinHTTP Native + Virtual Threads)"));
+        System.out.println(" " + boldWhite("FastWebSpider") + darkGray(" — Massive BFS Real-Time Tree & Stream Crawler (WinHTTP Native + Virtual Threads)"));
         System.out.println(darkGray(" MISSION: Live high-throughput network scan discovering 20,000+ branch links and hardware vector references"));
         System.out.println(darkGray("========================================================================================================================"));
         System.out.println();
@@ -59,7 +59,7 @@ public class DemoBFS {
         System.out.println();
         System.out.println(darkGray("[Root Stream] Spawning ") + boldWhite(String.valueOf(SEED_PAGES.size())) + darkGray(" concurrent crawler workers on Java Virtual Threads...\n"));
 
-        FastSpider spider = FastSpider.open();
+        FastWebSpider spider = FastWebSpider.open();
         Set<String> visited = ConcurrentHashMap.newKeySet();
         AtomicInteger totalCrawled = new AtomicInteger(0);
         AtomicLong totalBytes = new AtomicLong(0);

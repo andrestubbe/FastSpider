@@ -1,6 +1,6 @@
-package fastspider.benchmark;
+package fastwebspider.benchmark;
 
-import fastspider.FastSpider;
+import fastwebspider.FastWebSpider;
 import org.openjdk.jmh.annotations.*;
 
 import java.nio.charset.StandardCharsets;
@@ -10,7 +10,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Standard JMH Benchmark Suite for FastSpider Native AVX2 Link Extraction vs JDK Pattern.
+ * Standard JMH Benchmark Suite for FastWebSpider Native AVX2 Link Extraction vs JDK Pattern.
  */
 @BenchmarkMode(Mode.Throughput)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
@@ -18,19 +18,19 @@ import java.util.regex.Pattern;
 @Warmup(iterations = 2, time = 1)
 @Measurement(iterations = 3, time = 1)
 @Fork(1)
-public class FastSpiderJmhBenchmark {
+public class FastWebSpiderJmhBenchmark {
 
     private static final Pattern HREF_PATTERN = Pattern.compile("href=\"([^\"]+)\"");
 
-    private FastSpider spider;
+    private FastWebSpider spider;
     private byte[] sampleHtmlBytes;
     private String sampleHtmlText;
 
     @Setup
     public void setup() {
-        spider = FastSpider.open();
+        spider = FastWebSpider.open();
         try {
-            FastSpider.SpiderResponse response = spider.fetchAsync("https://en.wikipedia.org/wiki/Java_(programming_language)").join();
+            FastWebSpider.SpiderResponse response = spider.fetchAsync("https://en.wikipedia.org/wiki/Java_(programming_language)").join();
             if (response.isSuccess() && response.rawBody().length > 0) {
                 sampleHtmlBytes = response.rawBody();
             } else {
@@ -53,7 +53,7 @@ public class FastSpiderJmhBenchmark {
     }
 
     @Benchmark
-    public int benchmarkFastSpiderAvx2Extraction() {
+    public int benchmarkFastWebSpiderAvx2Extraction() {
         List<String> links = spider.extractHrefs(sampleHtmlBytes);
         return links.size();
     }

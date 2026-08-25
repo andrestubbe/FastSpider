@@ -1,4 +1,4 @@
-#include "fastspider.h"
+#include "fastwebspider.h"
 #include <windows.h>
 #include <winhttp.h>
 #include <stdio.h>
@@ -22,7 +22,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
     switch (ul_reason_for_call) {
         case DLL_PROCESS_ATTACH:
             DisableThreadLibraryCalls(hModule);
-            g_hSession = WinHttpOpen(L"FastSpider/1.0 (Windows; JNI)",
+            g_hSession = WinHttpOpen(L"fastwebspider/1.0 (Windows; JNI)",
                                      WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
                                      WINHTTP_NO_PROXY_NAME,
                                      WINHTTP_NO_PROXY_BYPASS, 0);
@@ -401,7 +401,7 @@ std::vector<std::string> extractHrefsCpp(const uint8_t* data, size_t length) {
 
 extern "C" {
 
-JNIEXPORT jobject JNICALL Java_fastspider_FastSpiderImpl_nativeFetch(
+JNIEXPORT jobject JNICALL Java_fastwebspider_FastWebSpiderImpl_nativeFetch(
     JNIEnv* env, jobject obj, jstring urlStr) {
 
     if (urlStr == nullptr) return nullptr;
@@ -516,13 +516,13 @@ JNIEXPORT jobject JNICALL Java_fastspider_FastSpiderImpl_nativeFetch(
         dwStatusCode = 400;
     }
 
-    // 3. Map values to Java record: fastspider.FastSpider.SpiderResponse
+    // 3. Map values to Java record: fastwebspider.fastwebspider.SpiderResponse
     jbyteArray bodyArray = env->NewByteArray((jsize)responseBuffer.size());
     if (!responseBuffer.empty()) {
         env->SetByteArrayRegion(bodyArray, 0, (jsize)responseBuffer.size(), reinterpret_cast<const jbyte*>(responseBuffer.data()));
     }
 
-    jclass respClass = env->FindClass("fastspider/FastSpider$SpiderResponse");
+    jclass respClass = env->FindClass("fastwebspider/FastWebSpider$SpiderResponse");
     if (!respClass) {
         return nullptr;
     }
@@ -535,7 +535,7 @@ JNIEXPORT jobject JNICALL Java_fastspider_FastSpiderImpl_nativeFetch(
     return respObj;
 }
 
-JNIEXPORT jstring JNICALL Java_fastspider_FastSpiderImpl_nativeExtractCleanText(
+JNIEXPORT jstring JNICALL Java_fastwebspider_FastWebSpiderImpl_nativeExtractCleanText(
     JNIEnv* env, jobject obj, jbyteArray htmlData) {
 
     if (htmlData == nullptr) return env->NewStringUTF("");
@@ -551,7 +551,7 @@ JNIEXPORT jstring JNICALL Java_fastspider_FastSpiderImpl_nativeExtractCleanText(
     return env->NewStringUTF(text.c_str());
 }
 
-JNIEXPORT jobjectArray JNICALL Java_fastspider_FastSpiderImpl_nativeExtractHrefs(
+JNIEXPORT jobjectArray JNICALL Java_fastwebspider_FastWebSpiderImpl_nativeExtractHrefs(
     JNIEnv* env, jobject obj, jbyteArray htmlData) {
 
     jclass stringClazz = env->FindClass("java/lang/String");

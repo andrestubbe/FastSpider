@@ -1,24 +1,24 @@
-package fastspider;
+package fastwebspider;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * FastSpider — High-performance native WinHTTP web crawler for Java.
+ * FastWebSpider — High-performance native WinHTTP web crawler for Java.
  * 
  * Leverages native Windows HTTP Services (WinHTTP) and Schannel at the JNI layer
  * to execute non-blocking, zero-copy asynchronous page fetches inside modern
  * Java Virtual Threads, avoiding garbage-collection and HTTP client overhead.
  */
-public interface FastSpider {
+public interface FastWebSpider {
 
     /**
-     * Opens a new FastSpider instance.
+     * Opens a new FastWebSpider instance.
      * 
-     * @return a thread-safe FastSpider implementation
+     * @return a thread-safe FastWebSpider implementation
      */
-    static FastSpider open() {
-        return new FastSpiderImpl();
+    static FastWebSpider open() {
+        return new FastWebSpiderImpl();
     }
 
     /**

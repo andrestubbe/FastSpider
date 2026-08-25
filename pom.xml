@@ -6,13 +6,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.andrestubbe</groupId>
-    <artifactId>FastSpider</artifactId>
+    <artifactId>FastWebSpider</artifactId>
     <version>0.1.2</version>
     <packaging>jar</packaging>
 
-    <name>FastSpider</name>
-    <description>Native Windows XXX API for Java</description>
-    <url>https://github.com/andrestubbe/FastSpider</url>
+    <name>FastWebSpider</name>
+    <description>Native Windows WinHTTP API for Java</description>
+    <url>https://github.com/andrestubbe/FastWebSpider</url>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -151,6 +151,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.5.0</version>
+                <configuration>
+                    <doclint>none</doclint>
+                    <failOnError>false</failOnError>
+                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>

@@ -1,4 +1,4 @@
-package fastspider;
+package fastwebspider;
 
 import fastansi.FastANSI;
 
@@ -20,12 +20,12 @@ public class DemoDFS {
 
     public static void main(String[] args) throws Exception {
         System.out.println(darkGray("========================================================================================================================"));
-        System.out.println(" " + boldWhite("FastSpider") + darkGray(" — DFS Deep-Dive Pathfinder Demo (Native AVX2 + Virtual Threads)"));
+        System.out.println(" " + boldWhite("FastWebSpider") + darkGray(" — DFS Deep-Dive Pathfinder Demo (Native AVX2 + Virtual Threads)"));
         System.out.println(darkGray(" MISSION: Auto-traverse Wikipedia graph from '") + boldWhite(START_URL) + darkGray("' -> Target: '") + boldWhite(TARGET_TOPIC) + darkGray("'"));
         System.out.println(darkGray("========================================================================================================================"));
         System.out.println();
 
-        FastSpider spider = FastSpider.open();
+        FastWebSpider spider = FastWebSpider.open();
         Set<String> visited = ConcurrentHashMap.newKeySet();
         String currentUrl = START_URL;
         int maxDepth = 25;
@@ -42,7 +42,7 @@ public class DemoDFS {
             totalHops++;
 
             long stepT0 = System.currentTimeMillis();
-            FastSpider.SpiderResponse resp = spider.fetchAsync(currentUrl).join();
+            FastWebSpider.SpiderResponse resp = spider.fetchAsync(currentUrl).join();
             long stepMs = System.currentTimeMillis() - stepT0;
 
             // AVX2 Native Link Extraction

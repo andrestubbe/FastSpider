@@ -1,4 +1,4 @@
-package fastspider;
+package fastwebspider;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -14,15 +14,15 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class FastSpiderTest {
+public class FastWebSpiderTest {
 
-    private static FastSpider spider;
+    private static FastWebSpider spider;
     private static HttpServer server;
     private static String baseUrl;
 
     @BeforeAll
     public static void setup() throws Exception {
-        spider = FastSpider.open();
+        spider = FastWebSpider.open();
         
         // Dynamic port selection
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
@@ -60,8 +60,8 @@ public class FastSpiderTest {
 
     @Test
     public void testFetchAsyncSuccess() throws Exception {
-        CompletableFuture<FastSpider.SpiderResponse> future = spider.fetchAsync(baseUrl + "/test");
-        FastSpider.SpiderResponse response = future.get();
+        CompletableFuture<FastWebSpider.SpiderResponse> future = spider.fetchAsync(baseUrl + "/test");
+        FastWebSpider.SpiderResponse response = future.get();
         
         assertNotNull(response);
         assertEquals(200, response.statusCode());
@@ -75,8 +75,8 @@ public class FastSpiderTest {
 
     @Test
     public void testFetchAsync404() throws Exception {
-        CompletableFuture<FastSpider.SpiderResponse> future = spider.fetchAsync(baseUrl + "/404");
-        FastSpider.SpiderResponse response = future.get();
+        CompletableFuture<FastWebSpider.SpiderResponse> future = spider.fetchAsync(baseUrl + "/404");
+        FastWebSpider.SpiderResponse response = future.get();
         
         assertNotNull(response);
         assertEquals(404, response.statusCode());
@@ -86,7 +86,7 @@ public class FastSpiderTest {
     @Test
     public void testBatchFetch() {
         List<String> urls = List.of(baseUrl + "/test", baseUrl + "/404", baseUrl + "/test");
-        List<FastSpider.SpiderResponse> responses = spider.fetchBatch(urls);
+        List<FastWebSpider.SpiderResponse> responses = spider.fetchBatch(urls);
         
         assertEquals(3, responses.size());
         assertEquals(200, responses.get(0).statusCode());

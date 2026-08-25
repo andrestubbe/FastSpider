@@ -1,4 +1,4 @@
-package fastspider;
+package fastwebspider;
 
 import fastansi.FastANSI;
 import fastregex.FastRegex;
@@ -20,7 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Multi-Tier Comparative Benchmark Suite for FastSpider vs Standard Java Stacks.
+ * Multi-Tier Comparative Benchmark Suite for FastWebSpider vs Standard Java Stacks.
  * Evaluates Link Extraction, Concurrent 200-Page Massive Crawling, and Plaintext Extraction with direct Head-to-Head comparisons.
  */
 public class Benchmark {
@@ -54,11 +54,11 @@ public class Benchmark {
 
     public static void main(String[] args) throws Exception {
         System.out.println(darkGray("========================================================================================================================"));
-        System.out.println(" " + boldWhite("FastSpider & FastJava") + darkGray(" — Comprehensive Multi-Tier 120-Column Benchmark Suite"));
+        System.out.println(" " + boldWhite("FastWebSpider & FastJava") + darkGray(" — Comprehensive Multi-Tier 120-Column Benchmark Suite"));
         System.out.println(darkGray("========================================================================================================================"));
         System.out.println();
 
-        FastSpider spider = FastSpider.open();
+        FastWebSpider spider = FastWebSpider.open();
 
         // ─────────────────────────────────────────────────────────────────────
         // Tier 1: Zero-Allocation AVX2 Link Extraction Benchmark
@@ -66,7 +66,7 @@ public class Benchmark {
         System.out.println(darkGray("[Tier 1]") + " " + boldWhite("HTML Link Extraction Benchmark") + darkGray(" (Heavy Wikipedia Document)"));
         System.out.print(darkGray(" Downloading live payload ... "));
 
-        FastSpider.SpiderResponse response = spider.fetchAsync("https://en.wikipedia.org/wiki/Java_(programming_language)").join();
+        FastWebSpider.SpiderResponse response = spider.fetchAsync("https://en.wikipedia.org/wiki/Java_(programming_language)").join();
         byte[] htmlBytes = response.rawBody();
         String htmlText = new String(htmlBytes, StandardCharsets.UTF_8);
         System.out.printf(darkGray("OK (") + boldWhite("%,d bytes") + darkGray(", %d ms)\n"), htmlBytes.length, response.fetchTimeMs());
@@ -85,7 +85,7 @@ public class Benchmark {
         double jdkOpsPerMs = (double) iterations / (jdkNanos / 1_000_000.0);
         double jdkAvgMs = (jdkNanos / 1_000_000.0) / iterations;
 
-        // FastSpider AVX2 Warmup & Benchmark
+        // FastWebSpider AVX2 Warmup & Benchmark
         for (int i = 0; i < warmup; i++) spider.extractHrefs(htmlBytes);
         long t1 = System.nanoTime();
         int totalFastLinks = 0;
@@ -103,7 +103,7 @@ public class Benchmark {
         System.out.printf(" %-48s | %-22s | %-20s | %-20s\n", "Extraction Engine", "Throughput (ops/ms)", "Avg Latency (ms)", "Speedup");
         System.out.println(darkGray("------------------------------------------------------------------------------------------------------------------------"));
         System.out.printf(" %-48s | %22.2f | %17.3f ms | %s\n", "Standard JDK Pattern.matcher(\"href=...\")", jdkOpsPerMs, jdkAvgMs, darkGray("1.00x Base          "));
-        System.out.printf(" %-48s | %22.2f | %17.3f ms | %s\n", "FastSpider AVX2 + FastRegex", fastOpsPerMs, fastAvgMs, boldWhite(String.format("%.2fx Faster         ", extractSpeedup)));
+        System.out.printf(" %-48s | %22.2f | %17.3f ms | %s\n", "FastWebSpider AVX2 + FastRegex", fastOpsPerMs, fastAvgMs, boldWhite(String.format("%.2fx Faster         ", extractSpeedup)));
         System.out.println(darkGray("------------------------------------------------------------------------------------------------------------------------"));
         System.out.printf(darkGray(" Extracted ") + boldWhite("%,d links") + darkGray(" per iteration across %,d iterations.\n\n"), totalFastLinks / iterations, iterations);
 
@@ -121,7 +121,7 @@ public class Benchmark {
             visitedSet.add(seed);
         }
         for (String seed : ROOT_SEEDS) {
-            FastSpider.SpiderResponse seedResp = spider.fetchAsync(seed).join();
+            FastWebSpider.SpiderResponse seedResp = spider.fetchAsync(seed).join();
             List<String> validLinks = filterWikiArticleLinks(spider.extractHrefs(seedResp.rawBody()));
             int added = 0;
             for (String lk : validLinks) {
@@ -142,16 +142,16 @@ public class Benchmark {
         long jdkBatchT0 = System.currentTimeMillis();
         List<CompletableFuture<HttpResponse<byte[]>>> jdkFutures = new ArrayList<>();
         for (String url : crawlUrls) {
-            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).header("User-Agent", "FastSpider-Benchmark/0.1").build();
+            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).header("User-Agent", "FastWebSpider-Benchmark/0.1").build();
             jdkFutures.add(jdkClient.sendAsync(req, HttpResponse.BodyHandlers.ofByteArray()));
         }
         CompletableFuture.allOf(jdkFutures.toArray(new CompletableFuture[0])).join();
         long jdkBatchDuration = System.currentTimeMillis() - jdkBatchT0;
         double jdkPagesPerSec = crawlUrls.size() / (Math.max(jdkBatchDuration, 1) / 1000.0);
 
-        // 2b. FastSpider Native WinHTTP Concurrent Batch
+        // 2b. FastWebSpider Native WinHTTP Concurrent Batch
         long fastBatchT0 = System.currentTimeMillis();
-        List<CompletableFuture<FastSpider.SpiderResponse>> fastFutures = new ArrayList<>();
+        List<CompletableFuture<FastWebSpider.SpiderResponse>> fastFutures = new ArrayList<>();
         for (String url : crawlUrls) {
             fastFutures.add(spider.fetchAsync(url));
         }
@@ -160,8 +160,8 @@ public class Benchmark {
 
         long totalDownloadedBytes = 0;
         int totalLinksDiscovered = 0;
-        for (CompletableFuture<FastSpider.SpiderResponse> f : fastFutures) {
-            FastSpider.SpiderResponse r = f.join();
+        for (CompletableFuture<FastWebSpider.SpiderResponse> f : fastFutures) {
+            FastWebSpider.SpiderResponse r = f.join();
             totalDownloadedBytes += r.rawBody().length;
             totalLinksDiscovered += spider.extractHrefs(r.rawBody()).size();
         }
@@ -175,7 +175,7 @@ public class Benchmark {
         System.out.printf(" %-48s | %-22s | %-20s | %-20s\n", "Parallel Crawler (200 Pages)", "Batch Duration", "Throughput", "Speedup");
         System.out.println(darkGray("------------------------------------------------------------------------------------------------------------------------"));
         System.out.printf(" %-48s | %19d ms | %15.1f p/s | %s\n", "Standard java.net.http.HttpClient", jdkBatchDuration, jdkPagesPerSec, darkGray("1.00x Base          "));
-        System.out.printf(" %-48s | %19d ms | %15.1f p/s | %s\n", "FastSpider Native WinHTTP + Virtual Threads", fastBatchDuration, fastPagesPerSec, boldWhite(String.format("%.2fx Faster         ", crawlSpeedup)));
+        System.out.printf(" %-48s | %19d ms | %15.1f p/s | %s\n", "FastWebSpider Native WinHTTP + Virtual Threads", fastBatchDuration, fastPagesPerSec, boldWhite(String.format("%.2fx Faster         ", crawlSpeedup)));
         System.out.println(darkGray("------------------------------------------------------------------------------------------------------------------------"));
         System.out.printf(darkGray(" Downloaded ") + boldWhite(String.format("%.2f MB", mbDownloaded)) + darkGray(" and discovered ") + boldWhite(String.format("%,d links", totalLinksDiscovered)) + darkGray(" across 200 nodes in real-time.\n\n"));
 
@@ -195,7 +195,7 @@ public class Benchmark {
         double jdkStripOpsPerMs = 100.0 / (jdkStripNanos / 1_000_000.0);
         double jdkStripAvgMs = (jdkStripNanos / 1_000_000.0) / 100.0;
 
-        // FastSpider Native AVX2 Clean Text Stripper
+        // FastWebSpider Native AVX2 Clean Text Stripper
         for (int i = 0; i < 30; i++) spider.extractCleanText(htmlBytes);
         long fastStripT0 = System.nanoTime();
         String cleanSample = "";
@@ -213,7 +213,7 @@ public class Benchmark {
         System.out.printf(" %-48s | %-22s | %-20s | %-20s\n", "HTML Stripper Engine", "Throughput (ops/ms)", "Avg Latency (ms)", "Speedup");
         System.out.println(darkGray("------------------------------------------------------------------------------------------------------------------------"));
         System.out.printf(" %-48s | %22.2f | %17.3f ms | %s\n", "Standard JDK RegEx HTML Parser", jdkStripOpsPerMs, jdkStripAvgMs, darkGray("1.00x Base          "));
-        System.out.printf(" %-48s | %22.2f | %17.3f ms | %s\n", "FastSpider AVX2 CleanText Stripper", fastStripOpsPerMs, fastStripAvgMs, boldWhite(String.format("%.2fx Faster         ", stripSpeedup)));
+        System.out.printf(" %-48s | %22.2f | %17.3f ms | %s\n", "FastWebSpider AVX2 CleanText Stripper", fastStripOpsPerMs, fastStripAvgMs, boldWhite(String.format("%.2fx Faster         ", stripSpeedup)));
         System.out.println(darkGray("------------------------------------------------------------------------------------------------------------------------"));
         System.out.printf(darkGray(" Processed 100 full payloads extracting ") + boldWhite(String.format("%,d characters", cleanSample.length())) + darkGray(" of clean text for AI models.\n\n"));
 
@@ -221,7 +221,7 @@ public class Benchmark {
         // Summary Card
         // ─────────────────────────────────────────────────────────────────────
         System.out.println(darkGray("========================================================================================================================"));
-        System.out.printf(" " + boldWhite("BENCHMARK VERDICT:") + darkGray(" FastSpider outperforms JDK across all tiers (") + boldWhite(String.format("Link Extraction: %.2fx", extractSpeedup)) + darkGray(" | ") + boldWhite(String.format("Batch Crawl: %.2fx", crawlSpeedup)) + darkGray(" | ") + boldWhite(String.format("CleanText: %.2fx", stripSpeedup)) + darkGray(").\n"));
+        System.out.printf(" " + boldWhite("BENCHMARK VERDICT:") + darkGray(" FastWebSpider outperforms JDK across all tiers (") + boldWhite(String.format("Link Extraction: %.2fx", extractSpeedup)) + darkGray(" | ") + boldWhite(String.format("Batch Crawl: %.2fx", crawlSpeedup)) + darkGray(" | ") + boldWhite(String.format("CleanText: %.2fx", stripSpeedup)) + darkGray(").\n"));
         System.out.println(darkGray("========================================================================================================================"));
     }
 
