@@ -44,7 +44,7 @@ public class Demo {
 
 - [Why FastSpider?](#why-fastspider)
 - [Key Features](#key-features)
-- [Real-World Scenarios](#real-world-scenarios)
+- [Real-World Examples](#real-world-examples)
 - [Performance Benchmarks](#performance-benchmarks)
 - [API Quick Reference](#api-quick-reference)
 - [Technical Examples & Hero Demos](#technical-examples--hero-demos)
@@ -78,11 +78,45 @@ Standard Java HTTP clients (`java.net.http.HttpClient` or Apache HttpComponents)
 
 ---
 
-## Real-World Scenarios
+## Real-World Examples
 
-- **🕷️ High-Throughput Web Crawling** — Indexing large-scale documentation portals and websites in milliseconds.
-- **🤖 Autonomous AI Scraping Agents** — Live background page fetching for `FastAIAgent` and `FastAIReasoner` pipelines.
-- **📑 Bulk Data Ingestion** — High-speed batch asset downloading for `FastContentParse` and `FastFileContentIndex`.
+### 1. Autonomous AI Research Agent Pipeline
+Background document and HTML fetching for `FastAIAgent` and `FastAIReasoner` without inflating JVM memory:
+```java
+FastSpider spider = FastSpider.open();
+spider.fetchAsync("https://en.wikipedia.org/wiki/Artificial_intelligence")
+      .thenAccept(res -> {
+          if (res.isSuccess()) {
+              List<String> links = spider.extractHrefs(res.rawBody());
+              System.out.printf("Discovered %,d reference links for agent context.\n", links.size());
+          }
+      });
+```
+
+### 2. High-Throughput Documentation Ingestion
+Batch fetching hundreds of documentation pages for instant full-text indexing in `FastFileContentIndex`:
+```java
+List<String> docPages = List.of(
+    "https://docs.oracle.com/en/java/javase/17/docs/api/index.html",
+    "https://docs.oracle.com/en/java/javase/21/docs/api/index.html"
+);
+List<CompletableFuture<FastSpider.SpiderResponse>> batch = docPages.stream()
+    .map(spider::fetchAsync)
+    .toList();
+CompletableFuture.allOf(batch.toArray(new CompletableFuture[0])).join();
+```
+
+### 3. Real-Time Price & Feed Monitoring
+Periodic, low-latency API and RSS endpoint polling with WinHTTP connection pooling and zero GC churn:
+```java
+ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+scheduler.scheduleAtFixedRate(() -> {
+    FastSpider.SpiderResponse res = spider.fetchAsync("https://api.example.com/feed").join();
+    if (res.isSuccess()) {
+        processFeed(res.rawBody());
+    }
+}, 0, 1, TimeUnit.SECONDS);
+```
 
 ---
 
