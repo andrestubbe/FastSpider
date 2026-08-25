@@ -15,7 +15,7 @@ class FastWebSpiderImpl implements FastWebSpider {
 
     static {
         // Load the JNI library using FastCore Unified Loader
-        FastCore.loadLibrary("FastWebSpider");
+        FastCore.loadLibrary("fastwebspider");
     }
 
     // Virtual Thread Executor for async WinHTTP tasks

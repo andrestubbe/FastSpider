@@ -11,5 +11,5 @@ if %ERRORLEVEL% NEQ 0 (
     exit /b %ERRORLEVEL%
 )
 
-call "C:\Users\andre\tools\apache-maven-3.9.9\bin\mvn.cmd" -q exec:java "-Dexec.mainClass=fastspider.DemoDFS" "-Dexec.args=" "-Dexec.vmArgs=--enable-native-access=ALL-UNNAMED" 2>nul
+call "C:\Users\andre\tools\apache-maven-3.9.9\bin\mvn.cmd" -q exec:java "-Dexec.mainClass=fastwebspider.DemoDFS" "-Dexec.args=" "-Dexec.vmArgs=--enable-native-access=ALL-UNNAMED" 2>nul
 pause

@@ -5,12 +5,12 @@ cd /d "%~dp0"
 set "MAVEN_OPTS=--enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -Dorg.slf4j.simpleLogger.defaultLogLevel=warn"
 
 echo ===================================================
-echo  Building FastSpider ^& JMH Benchmarks Uber-Jar
+echo  Building fastwebspider ^& JMH Benchmarks Uber-Jar
 echo ===================================================
 
 call "C:\Users\andre\tools\apache-maven-3.9.9\bin\mvn.cmd" -q clean install -DskipTests 2>nul
 if %ERRORLEVEL% NEQ 0 (
-    echo [ERROR] FastSpider install failed!
+    echo [ERROR] fastwebspider install failed!
     pause
     exit /b %ERRORLEVEL%
 )
