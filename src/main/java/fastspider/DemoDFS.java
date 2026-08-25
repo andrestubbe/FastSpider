@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 /**
  * Task-Driven DFS Pathfinder Demo (Hacker-Style Deep Descent Stream).
- * Uses FastANSI subtle Gray & White highlighting.
+ * Uses FastANSI subtle Gray & White highlighting with dedicated telemetry lines to prevent word-wrap.
  */
 public class DemoDFS {
 
@@ -59,10 +59,11 @@ public class DemoDFS {
             }
 
             String matchNotice = containsTarget ? " " + white("*** TARGET CONCEPT DISCOVERED ('" + TARGET_TERM + "') ***") : "";
-            System.out.printf("%s%s %s %-66s %s HTTP %d %s %,7d B %s %3d ms %s (%,d links)%s\n",
-                    gray(indent.toString()), gray("└──"), gray(String.format("[Hop %02d]", depth)),
-                    white(currentUrl), gray("|"), resp.statusCode(), gray("|"), resp.rawBody().length,
-                    gray("|"), stepMs, gray("|"), links.size(), matchNotice);
+            System.out.printf("%s%s %s %s\n",
+                    gray(indent.toString()), gray("└──"), gray(String.format("[Hop %02d]", depth)), white(currentUrl));
+            System.out.printf("%s    %s HTTP %d %s %,7d B %s %3d ms %s (%,d links)%s\n",
+                    gray(indent.toString()), gray("STATUS:"), resp.statusCode(), gray("|"),
+                    resp.rawBody().length, gray("|"), stepMs, gray("|"), links.size(), matchNotice);
 
             // Stream candidate links out in real time
             int previewCount = Math.min(links.size(), 6);
@@ -119,7 +120,7 @@ public class DemoDFS {
         Matcher matcher = HREF_PATTERN.matcher(html);
         while (matcher.find()) {
             String path = matcher.group(1);
-            if (!path.equals("Main_Page") && !path.contains(":")) {
+            if (!path.equals("Main_Page") && !path.contains(":") && !path.contains("?")) {
                 links.add("https://en.wikipedia.org/wiki/" + path);
             }
         }

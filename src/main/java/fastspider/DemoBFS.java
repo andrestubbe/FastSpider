@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * High-Speed Visual BFS Tree & Stream Crawler Demo.
- * Displays the initial seed queue followed by live parallel crawler torrents.
+ * Formats URLs and telemetry across clean dedicated lines to prevent terminal word-wrap.
  */
 public class DemoBFS {
 
@@ -94,10 +94,11 @@ public class DemoBFS {
                 String tag = kwHits > 0 ? " " + white("[MATCH: " + kwHits + "x '" + SEARCH_KEYWORD + "']") : "";
 
                 synchronized (System.out) {
-                    System.out.printf("  %s %s %-66s %s HTTP %d %s %,7d B %s %3d ms %s %,d links%s\n",
-                            gray(branch), gray(String.format("[%02d]", index)), white(url),
-                            gray("|"), res.statusCode(), gray("|"), res.rawBody().length,
-                            gray("|"), res.fetchTimeMs(), gray("|"), childs.size(), tag);
+                    System.out.printf("  %s %s %s\n",
+                            gray(branch), gray(String.format("[%02d]", index)), white(url));
+                    System.out.printf("  %s    %s HTTP %d %s %,7d B %s %3d ms %s %,d links%s\n",
+                            gray(subIndent), gray("STATUS:"), res.statusCode(), gray("|"),
+                            res.rawBody().length, gray("|"), res.fetchTimeMs(), gray("|"), childs.size(), tag);
 
                     // Stream 8 distinct live candidate links for intense visual flow
                     int streamPreview = Math.min(childs.size(), 8);
@@ -131,9 +132,10 @@ public class DemoBFS {
                         totalDiscoveredLinks.addAndGet(subChilds.size());
 
                         synchronized (System.out) {
-                            System.out.printf("  %s  %s %s %-58s %s HTTP %d %s %,7d B %s %3d ms %s %,d links%s\n",
-                                    gray(subIndent), gray("├──"), gray(String.format("[SUB-PAGE %03d]", subCrawledCount)),
-                                    white(subUrl), gray("|"), subRes.statusCode(), gray("|"),
+                            System.out.printf("  %s  ├── %s %s\n",
+                                    gray(subIndent), gray(String.format("[SUB-PAGE %03d]", subCrawledCount)), white(subUrl));
+                            System.out.printf("  %s  │    %s HTTP %d %s %,7d B %s %3d ms %s %,d links%s\n",
+                                    gray(subIndent), gray("STATUS:"), subRes.statusCode(), gray("|"),
                                     subRes.rawBody().length, gray("|"), subRes.fetchTimeMs(), gray("|"), subChilds.size(), subTag);
                         }
                     }));
