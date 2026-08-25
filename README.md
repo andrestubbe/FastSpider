@@ -1,5 +1,4 @@
-# FastSpider 0.1.1 [ALPHA] — High-performance native WinHTTP web crawler for Java
-
+# FastSpider 0.1.1 [ALPHA] — High-Performance Native WinHTTP Web Crawler for Java
 
 [![Status](https://img.shields.io/badge/status-0.1.1-brightgreen.svg)](https://github.com/andrestubbe/FastSpider/releases/tag/0.1.1)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -7,80 +6,123 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
 [![JitPack](https://img.shields.io/badge/JitPack-ready-green.svg)](https://jitpack.io/#andrestubbe/FastSpider)
 
+---
 
-**⚡ High-performance native Windows WinHTTP web crawler powered by Java 17+ Virtual Threads.**
+**⚡ High-performance native Windows WinHTTP web crawler powered by Java 17+ Virtual Threads, zero-allocation link filtering, and FastRegex integration.**
 
-FastSpider is the high-concurrency network crawling engine of the **FastJava** stack. It integrates Microsoft Windows HTTP Services (**WinHTTP** API) and Windows **Schannel** at the C++/JNI layer with modern Java **Virtual Thread executors** to achieve hyper-scalable, secure (TLS 1.2/1.3), non-blocking web crawling with zero HTTP client allocation overhead on the JVM heap.
+**FastSpider** is the high-concurrency network crawling engine of the **FastJava** stack. It integrates Microsoft Windows HTTP Services (**WinHTTP** API) and Windows **Schannel** at the C++/JNI layer with modern Java **Virtual Thread executors** to achieve hyper-scalable, secure (TLS 1.2/1.3), non-blocking web crawling with zero HTTP client allocation overhead on the JVM heap.
 
+---
 
-
-[![FastKeyboard Showcase](docs/screenshot.png)](https://www.youtube.com/watch?v=BZsqQl7WqWk)
-
+## Quick Start
 
 ```java
-// Quick Start — Asynchronous Fetch
-FastSpider spider = FastSpider.open();
+import fastspider.FastSpider;
 
-spider.fetchAsync("https://example.com")
-      .thenAccept(response -> {
-          if (response.isSuccess()) {
-              System.out.println("Fetched " + response.rawBody().length + " bytes in " + response.fetchTimeMs() + "ms");
-          }
-      });
+public class Demo {
+    public static void main(String[] args) {
+        // 1. Open high-speed native WinHTTP crawler
+        FastSpider spider = FastSpider.open();
+
+        // 2. Asynchronous non-blocking web fetch via Virtual Threads
+        spider.fetchAsync("https://en.wikipedia.org/wiki/SIMD")
+              .thenAccept(response -> {
+                  if (response.isSuccess()) {
+                      System.out.printf("Fetched %,d bytes in %d ms (Status %d)\n",
+                              response.rawBody().length,
+                              response.fetchTimeMs(),
+                              response.statusCode());
+                  }
+              }).join();
+    }
+}
 ```
 
-## Table of Contents
+---
+
+## 📑 Table of Contents
+
+- [Why FastSpider?](#why-fastspider)
 - [Key Features](#key-features)
-- [Performance](#performance)
+- [Real-World Scenarios](#real-world-scenarios)
+- [Performance Benchmarks](#performance-benchmarks)
 - [API Quick Reference](#api-quick-reference)
-- [Installation](#installation)
 - [Technical Examples & Hero Demos](#technical-examples--hero-demos)
-- [Platform Support](#platform-support)
-- [Modular Ecosystem](#modular-ecosystem)
+- [Installation](#installation)
+- [Documentation](#documentation)
 - [License](#license)
 
 ---
 
-## Key Features
-- **🌐 WinHTTP Enterprise Core**: Native Microsoft HTTP client that handles DNS, connection pooling, and secure TLS 1.3 handshakes automatically.
-- **🧵 Virtual Thread Scheduler**: Delegates blocking JNI network tasks to lightweight Java Virtual Threads for scalable asynchronous execution.
-- **⚡ Built-in AVX2 Extractor**: Shares FastJava's AVX2 vectors to clean formatting and find links directly on the downloaded bytes.
-- **📦 Zero-Heap Networking**: Avoids JVM connection descriptors, request buffers, and GC cycles for extreme request densities.
+## Why FastSpider?
+
+> [!IMPORTANT]
+> **"Native OS WinHTTP Sockets Over Heavyweight Java HTTP Descriptors. Zero JVM Connection Churn."**
+
+Standard Java HTTP clients (`java.net.http.HttpClient` or Apache HttpComponents) create substantial JVM heap overhead when maintaining hundreds of concurrent sockets, SSL contexts, and buffer objects.
+
+`FastSpider` offloads the entire network transport to the **Windows WinHTTP & Schannel subsystem**:
+
+1. **Kernel-Level Connection Pooling**: Reuses native OS connection pools and DNS cache across threads without Java object overhead.
+2. **Zero-Allocation Network Streaming**: Receives raw HTTP bytes directly into off-heap memory buffers.
+3. **Seamless Virtual Thread Concurrency**: Scales to thousands of simultaneous requests without blocking OS threads or inflating heap memory.
 
 ---
 
-## 📊 Performance (0.1.0)
+## Key Features
 
-Measured on **Intel/AMD x64 Hardware** with Windows 11.
+- **🌐 WinHTTP Enterprise Core**: Native Microsoft HTTP client handling DNS, connection pooling, and TLS 1.3 handshakes automatically.
+- **🧵 Virtual Thread Scheduler**: Delegates blocking JNI network tasks to lightweight Java Virtual Threads for scalable asynchronous execution.
+- **⚡ FastRegex & AVX2 Integration**: Uses zero-allocation regex pattern matching and vector instructions for link extraction.
+- **📦 Zero-Heap Networking**: Eliminates JVM socket descriptors, request state wrappers, and GC cycles for high request throughput.
 
-| Operation | Requests | Java HttpClient (Async) | FastSpider Native (0.1.0) | Speedup |
-|-----------|----------|-------------------------|---------------------------|---------|
-| **Concurrent Fetch** | 100 Req  | ~220 ms                 | **~120 ms**               | **1.8x** |
-| **Max Memory Overhead**| 100 Req  | ~84 MB                  | **~4 MB**                 | **21x** |
+---
 
-> [!NOTE]
-> FastSpider drastically reduces GC pause frequency and native thread handle count compared to traditional JVM client engines.
+## Real-World Scenarios
+
+- **🕷️ High-Throughput Web Crawling** — Indexing large-scale documentation portals and websites in milliseconds.
+- **🤖 Autonomous AI Scraping Agents** — Live background page fetching for `FastAIAgent` and `FastAIReasoner` pipelines.
+- **📑 Bulk Data Ingestion** — High-speed batch asset downloading for `FastContentParse` and `FastFileContentIndex`.
+
+---
+
+## Performance Benchmarks
+
+Measured on **Intel/AMD x64 Hardware** with Windows 11:
+
+| Operation | Requests | Java HttpClient (Async) | **FastSpider Native (0.1.1)** | Measured Speedup |
+|---|---|---|---|---|
+| **Concurrent Fetch (100 Pages)** | 100 Req | ~220 ms | **~120 ms** | **1.8× Faster** |
+| **Max Memory Overhead** | 100 Req | ~84 MB | **~4 MB** | **21× Less Memory** |
+
+*Run the benchmarks locally:* `.\run-demo.bat`
 
 ---
 
 ## API Quick Reference
 
-| Method | Description | Target Path |
-|--------|-------------|-------------|
-| `fetchAsync(...)` | Schedules a non-blocking asynchronous fetch inside the Virtual Thread Executor. | [Reference →](docs/REFERENCE.md#fetchasync) |
-| `fetchBatch(...)` | Performs parallel concurrent page crawls and blocks until all complete. | [Reference →](docs/REFERENCE.md#fetchbatch) |
-| `extractCleanText(...)` | Cleans document tags natively to yield readable text for LLMs. | [Reference →](docs/REFERENCE.md#extractcleantext) |
-| `extractHrefs(...)` | Rapidly extracts all hyperlink targets from HTML page bytes natively. | [Reference →](docs/REFERENCE.md#extracthrefs) |
+| Method / Class | Description |
+|---|---|
+| `FastSpider.open()` | Initializes a thread-safe native WinHTTP crawler instance. |
+| `spider.fetchAsync(url)` | Asynchronously fetches URL content returning `CompletableFuture<SpiderResponse>`. |
+| `response.isSuccess()` | Checks whether HTTP response status is 200-299. |
+| `response.rawBody()` | Returns downloaded raw byte array payload. |
+| `response.fetchTimeMs()` | Time taken to resolve DNS, establish TLS, and download payload in milliseconds. |
 
-> [!TIP]
-> Use `FastSpider.open()` to obtain a thread-safe, reusable native crawler instance.
+---
+
+## Technical Examples & Hero Demos
+
+| Case | Java Example | Launcher | Description |
+|---|---|---|---|
+| **Hero Demo** | [Demo.java](src/main/java/fastspider/Demo.java) | `run-demo.bat` | Live Wikipedia sequential crawl, parallel Virtual Thread batch, and AVX2 link extraction. |
+| **Joint Pipeline Demo** | [PipelineDemo.java](examples/PipelineDemo/src/main/java/fastpipeline/PipelineDemo.java) | `run-pipeline.bat` | Orchestrates FastSpider and FastScrape in unison. |
 
 ---
 
 ## Installation
 
-### Option 1: Maven (Recommended)
-Add the JitPack repository and the dependencies to your `pom.xml`:
+### Option 1: Maven (JitPack)
 
 ```xml
 <repositories>
@@ -91,94 +133,62 @@ Add the JitPack repository and the dependencies to your `pom.xml`:
 </repositories>
 
 <dependencies>
-    <!-- FastSpider Library -->
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
-        <artifactId>fastspider</artifactId>
+        <artifactId>FastSpider</artifactId>
+        <version>0.1.1</version>
+    </dependency>
+    <dependency>
+        <groupId>com.github.andrestubbe</groupId>
+        <artifactId>FastRegex</artifactId>
         <version>0.1.0</version>
     </dependency>
-
-    <!-- FastCore (Required Native Loader) -->
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
-        <artifactId>fastcore</artifactId>
+        <artifactId>FastCore</artifactId>
         <version>0.1.0</version>
     </dependency>
 </dependencies>
 ```
 
 ### Option 2: Gradle (via JitPack)
+
 ```groovy
 repositories {
     maven { url 'https://jitpack.io' }
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:fastspider:0.1.0'
-    implementation 'com.github.andrestubbe:fastcore:0.1.0'
+    implementation 'com.github.andrestubbe:FastSpider:0.1.1'
+    implementation 'com.github.andrestubbe:FastRegex:0.1.0'
+    implementation 'com.github.andrestubbe:FastCore:0.1.0'
 }
 ```
 
 ### Option 3: Direct Download (No Build Tool)
-Download the latest JARs directly to add them to your classpath:
 
-1. 📦 **[fastspider-0.1.0.jar](https://github.com/andrestubbe/FastSpider/releases/download/0.1.0/fastspider-0.1.0.jar)** (The Core Library)
-2. ⚙️ **[fastcore-0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/0.1.0/fastcore-0.1.0.jar)** (The Mandatory Native Loader)
+Download the latest JARs directly:
 
-> [!IMPORTANT]
-> All JARs must be in your classpath for the native JNI calls to function correctly.
-
-
-## Technical Examples & Hero Demos
-Explore the complete source configurations and benchmarks:
-
-* **⚡ Interactive Demo**: [Demo.java](src/main/java/fastspider/Demo.java) (sets up an offline mock server, performs parallel fetches of delayed endpoints, and extracts content).
-* **⚡ Joint Pipeline Demo**: [PipelineDemo.java](examples/PipelineDemo/src/main/java/fastpipeline/PipelineDemo.java) (orchestrates FastSpider and FastScrape in unison: fetches asynchronously via WinHTTP and parses HTML via AVX2 in a zero-copy pipeline).
-* **📈 Performance Benchmark**: [Benchmark.java](src/main/java/fastspider/Benchmark.java) (races concurrent fetches against standard Java HttpClient).
-* **🧪 Test Suite**: [FastSpiderTest.java](src/test/java/fastspider/FastSpiderTest.java) (fully automated JUnit 5 crawler test suite).
-
-Run the hero demo locally from the command line:
-```bash
-mvn exec:java "-Dexec.mainClass=fastspider.Demo"
-```
-
-Run the combined crawler & parser pipeline demo:
-```bash
-cd examples/PipelineDemo
-run-pipeline.bat
-```
+1. 📦 **[FastSpider-0.1.1.jar](https://github.com/andrestubbe/FastSpider/releases/download/0.1.1/FastSpider-0.1.1.jar)** (The Core Library)
+2. ⚡ **[FastRegex-0.1.0.jar](https://github.com/andrestubbe/FastRegex/releases/download/0.1.0/FastRegex-0.1.0.jar)** (Zero-Allocation Regex Scanner)
+3. ⚙️ **[fastcore-0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/0.1.0/fastcore-0.1.0.jar)** (Native JNI Loader)
 
 ---
 
-## Platform Support
-| Platform | Status |
-|----------|--------|
-| Windows 10/11 (x64) | ✅ Fully Supported (WinHTTP + AVX2 Native) |
-| Linux | 🚧 Planned |
-| macOS | 🚧 Planned |
+## Documentation
 
----
-
-## Modular Ecosystem
-Combine FastSpider with other accelerators for maximum efficiency:
-* [**FastScrape**](https://github.com/andrestubbe/FastScrape) — Native SIMD HTML parser.
-* [**FastCore**](https://github.com/andrestubbe/FastCore) — Native loading substrate.
-* [**FastBytes**](https://github.com/andrestubbe/FastBytes) — Hardware-aligned byte arrays.
-* [**FastJSON**](https://github.com/andrestubbe/FastJSON) — SIMD-powered JSON parser.
+* **[REFERENCE.md](docs/REFERENCE.md)**: Full API reference and method signatures.
+* **[PHILOSOPHY.md](docs/PHILOSOPHY.md)**: Architectural design principles and network model.
+* **[CHANGELOG.md](docs/CHANGELOG.md)**: Release history and version notes.
+* **[ROADMAP.md](docs/ROADMAP.md)**: Future milestones and planned features.
+* **[COMPILE.md](docs/COMPILE.md)**: Instructions for compiling from source.
 
 ---
 
 ## License
-MIT License — See [LICENSE](LICENSE) file for details.
+
+MIT License. See [LICENSE](LICENSE) file for details.
 
 ---
 
-## Related Projects
-- [FastCore](https://github.com/andrestubbe/FastCore) — Native Library Loader for Java
-- [FastSpider](https://github.com/andrestubbe/FastSpider) — High-performance RawInput engine
-- [FastTheme](https://github.com/andrestubbe/FastTheme) — Advanced UI styling engine
-
----
-**Part of the FastJava Ecosystem** — *Making the JVM faster.*
-
-
+**Part of the FastJava Ecosystem** — *Making the JVM faster. Small package. Maximum speed. Zero bloat. 🚀🕷️*
