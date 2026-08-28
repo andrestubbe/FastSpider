@@ -1,6 +1,6 @@
-# FastWebSpider 0.1.2 [ALPHA] — High-Performance Native WinHTTP Web Crawler for Java
+# FastWebSpider 0.1.3 [ALPHA] — High-Performance Native WinHTTP Web Crawler for Java
 
-[![Status](https://img.shields.io/badge/status-0.1.2-brightgreen.svg)](https://github.com/andrestubbe/FastWebSpider/releases/tag/0.1.2)
+[![Status](https://img.shields.io/badge/status-0.1.3-brightgreen.svg)](https://github.com/andrestubbe/FastWebSpider/releases/tag/0.1.3)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java](https://img.shields.io/badge/Java-17+-blue.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010+-lightgrey.svg)]()
@@ -174,12 +174,12 @@ Benchmarked on **JDK 26 HotSpot 64-Bit** measuring single-thread and concurrent 
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>FastWebSpider</artifactId>
-        <version>0.1.2</version>
+        <version>0.1.3</version>
     </dependency>
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>FastRegex</artifactId>
-        <version>0.1.0</version>
+        <version>0.1.1</version>
     </dependency>
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
@@ -197,8 +197,8 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:FastWebSpider:0.1.2'
-    implementation 'com.github.andrestubbe:FastRegex:0.1.0'
+    implementation 'com.github.andrestubbe:FastWebSpider:0.1.3'
+    implementation 'com.github.andrestubbe:FastRegex:0.1.1'
     implementation 'com.github.andrestubbe:FastCore:0.1.0'
 }
 ```
@@ -207,7 +207,7 @@ dependencies {
 
 Download the latest JARs directly:
 
-1. 📦 **[FastWebSpider-0.1.2.jar](https://github.com/andrestubbe/FastWebSpider/releases/download/0.1.2/FastWebSpider-0.1.2.jar)** (The Core Library)
+1. 📦 **[FastWebSpider-0.1.3.jar](https://github.com/andrestubbe/FastWebSpider/releases/download/0.1.3/FastWebSpider-0.1.3.jar)** (The Core Library)
 2. ⚡ **[FastRegex-0.1.0.jar](https://github.com/andrestubbe/FastRegex/releases/download/0.1.0/FastRegex-0.1.0.jar)** (Zero-Allocation Regex Scanner)
 3. ⚙️ **[fastcore-0.1.0.jar](https://github.com/andrestubbe/FastCore/releases/download/0.1.0/fastcore-0.1.0.jar)** (Native JNI Loader)
 
